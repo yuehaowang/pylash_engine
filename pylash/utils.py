@@ -1,4 +1,4 @@
-import sys
+import sys, threading
 from PyQt4 import QtGui, QtCore
 
 

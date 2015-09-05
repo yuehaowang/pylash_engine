@@ -18,6 +18,7 @@ class LoadManage(Object):
 		raise Exception("LoadManage cannot be instantiated.")
 	
 	def load(loadList, onUpdate = None, onComplete = None):
+		LoadManage.__resultList = {}
 		LoadManage.__loadIndex = 0
 		LoadManage.__loadListLength = len(loadList)
 		LoadManage.__onUpdate = onUpdate
@@ -37,7 +38,7 @@ class LoadManage(Object):
 				if "path" in o:
 					loader.load(o["path"])
 
-		loadThread = threading.Thread(target = startLoad)
+		loadThread = threading.Thread(target = startLoad, name = "xxx")
 		loadThread.start()
 
 	def loadComplete(e):
