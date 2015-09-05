@@ -78,7 +78,4 @@ def startGame(e):
 	gameLayer = GameLayer(dataList["bg"])
 	addChild(gameLayer)
 
-	fps = FPS()
-	addChild(fps)
-
 init(30, "Find Character", 700, 600, main)
