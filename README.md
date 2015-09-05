@@ -6,32 +6,39 @@ Pylash is a game engine for python which imitates some classes and functions in 
 
 
 ## Get Pylash
-*With Git:*
+
+**With Git:**
+
 Input this command in Git Bash to clone pylash:
+
 ```
 git clone git@github.com:yuehaowang/pylash_engine.git
 ```
 
-*Without Git:*
+**Without Git:**
+
 The url to download the engine is: 
 
 [https://github.com/yuehaowang/pylash_engine/archive/master.zip](https://github.com/yuehaowang/pylash_engine/archive/master.zip)
 
 
 ## Before Using Pylash
+
 For pylash is based on Python3 and PyQt4, you need to install Python3 and PyQt4 first.
 
-*Python3 will be found here:*
+**Python3 will be found here:**
 
 [https://www.python.org/](https://www.python.org/)
 
-*PyQt will be found here:*
+**PyQt will be found here:**
 
 [https://riverbankcomputing.com/software/pyqt/intro](https://riverbankcomputing.com/software/pyqt/intro)
 
 
 ## Get Started
+
 Writing...
 
 ## Documentation
+
 Documentation comes soon...
