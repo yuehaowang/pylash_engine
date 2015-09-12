@@ -1,14 +1,15 @@
 # Pylash Engine
 ---------------
 
+**Latest Version: 1.0.0**
 
-Pylash is a game engine for python which imitates some classes and functions in flash. We develop pylash with Python3 and the GUI engine of pylash is PyQt4. Many classes which are almost from flash such as Sprite, BitmapData, Bitmap, TextField, Loader and Graphics will be found in pylash.
+`Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
 ## Get Pylash
 
 **With Git:**
 
-Input this command in Git Bash to clone pylash:
+Input this command in `Git Bash` to clone `pylash`:
 
 ```
 git clone git@github.com:yuehaowang/pylash_engine.git
@@ -23,7 +24,7 @@ The url to download the engine is:
 
 ## Before Using Pylash
 
-For pylash is based on Python3 and PyQt4, you need to install them first.
+For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 **Python3 will be found here:**
 
@@ -36,9 +37,20 @@ For pylash is based on Python3 and PyQt4, you need to install them first.
 
 ## Demo Screenshots
 
+- **Find Character**
+
 ![Demo 1](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo1.png)
 
+- **Get Fruits**
+
 ![Demo 2](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo2.png)
+
+
+## Changelog
+
+#### version 1.0.0
+
+Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules
 
 
 ## Get Started
