@@ -375,7 +375,7 @@ class Sprite(DisplayObjectContainer):
 	def __init__(self):
 		super(Sprite, self).__init__()
 
-		self.graphics = LGraphics()
+		self.graphics = Graphics()
 		self.graphics.parent = self
 		self._clipPath = self.graphics._clipPath
 
@@ -514,9 +514,9 @@ class Sprite(DisplayObjectContainer):
 		return self.endY() - self.startY()
 
 
-class LGraphics(DisplayObject):
+class Graphics(DisplayObject):
 	def __init__(self):
-		super(LGraphics, self).__init__()
+		super(Graphics, self).__init__()
 		
 		self.__drawingList = []
 		self.__dataList = []
