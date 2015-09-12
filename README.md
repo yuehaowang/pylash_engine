@@ -41,6 +41,12 @@ For pylash is based on Python3 and PyQt4, you need to install them first.
 ![Demo 2](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo2.png)
 
 
+## Changelog
+
+version 1.0
+Create pylash with display, events, utils, text, system modules
+
+
 ## Get Started
 
 Writing...
