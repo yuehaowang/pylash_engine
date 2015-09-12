@@ -1,7 +1,7 @@
 import time
 from PyQt4 import QtGui, QtCore
 from .utils import Object, stage, getColor, Stage
-from .events import EventDispatcher, Event, MouseEvent
+from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
 
 
 __author__ = "Yuehao Wang"
@@ -22,6 +22,7 @@ class DisplayObject(EventDispatcher):
 		self.visible = True
 		self.blendMode = None
 		self.mask = None
+		self._clipPath = None
 
 	@property
 	def width(self):
@@ -71,9 +72,16 @@ class DisplayObject(EventDispatcher):
 		c.scale(self.scaleX, self.scaleY)
 		c.setCompositionMode(self.__getCompositionMode())
 
+		if self._hasMask():
+			c.setClipPath(self.mask._clipPath)
+			c.clipPath()
+
 		self._loopDraw(c)
 
 		c.restore()
+
+	def _hasMask(self):
+		return isinstance(self.mask, DisplayObject) and isinstance(self.mask._clipPath, QtGui.QPainterPath)
 
 	def _isMouseOn(self, e, cd):
 		ox = e["offsetX"]
@@ -82,11 +90,16 @@ class DisplayObject(EventDispatcher):
 		y = cd["y"]
 		scaleX = cd["scaleX"]
 		scaleY = cd["scaleY"]
+		w = self._getOriginalWidth()
+		h = self._getOriginalHeight()
 
-		if x <= ox <= x + self._getOriginalWidth() * scaleX and y <= oy <= y + self._getOriginalHeight() * scaleY:
-			e["target"] = self
+		if self._hasMask():
+			return self.mask._isMouseOn(e, cd)
+		else:
+			if x <= ox <= x + w * scaleX and y <= oy <= y + h * scaleY:
+				e["target"] = self
 
-			return True
+				return True
 
 		return False
 
@@ -364,6 +377,7 @@ class Sprite(DisplayObjectContainer):
 
 		self.graphics = LGraphics()
 		self.graphics.parent = self
+		self._clipPath = self.graphics._clipPath
 
 	def _loopDraw(self, c):
 		self.graphics._show(c)
@@ -426,29 +440,30 @@ class Sprite(DisplayObjectContainer):
 		}
 
 	def _isMouseOn(self, e, cd):
-		childList = list(self.childList)
-		childList.reverse()
+		childList = self.childList[::-1]
 		
-		for o in childList:
-			childCd = self.__getVisualCoordinate(cd, o)
+		if not self._hasMask():
+			for o in childList:
+				childCd = self.__getVisualCoordinate(cd, o)
 
-			if o._isMouseOn(e, childCd):
-				e["target"] = o
+				if o._isMouseOn(e, childCd):
+					e["target"] = o
+
+					return True
+
+			graphicsCd = self.__getVisualCoordinate(cd, self.graphics)
+
+			if (self.graphics._isMouseOn(e, graphicsCd)):
+				e["target"] = self.graphics
 
 				return True
-
-		graphicsCd = self.__getVisualCoordinate(cd, self.graphics)
-
-		if (self.graphics._isMouseOn(e, graphicsCd)):
-			e["target"] = self.graphics
-
-			return True
+		else:
+			return self.mask._isMouseOn(e, cd)
 
 		return False
 
 	def _enterMouseEvent(self, e, cd):
-		childList = list(self.childList)
-		childList.reverse()
+		childList = self.childList[::-1]
 
 		currentCd = self.__getVisualCoordinate(cd, self)
 
@@ -505,6 +520,7 @@ class LGraphics(DisplayObject):
 		
 		self.__drawingList = []
 		self.__dataList = []
+		self._clipPath = QtGui.QPainterPath()
 
 	def _show(self, c):
 		for drawingFunc in self.__drawingList:
@@ -517,19 +533,25 @@ class LGraphics(DisplayObject):
 	def clear(self):
 		self.__drawingList = []
 		self.__dataList = []
+		del self._clipPath
+		self._clipPath = QtGui.QPainterPath()
 
 	def drawLine(self, lineWidth, lineColor, path):
 		if len(path) < 4:
 			raise ValueError("parameter 'path' must have 4 items: [begin x, begin y, end x, end y].")
 
-		def drawingFunc(c):
-			pen = QtGui.QPen()
-			pen.setWidth(lineWidth)
-			pen.setColor(getColor(lineColor))
+		pen = QtGui.QPen()
+		pen.setWidth(lineWidth)
+		pen.setColor(getColor(lineColor))
 
+		def drawingFunc(c):
 			c.setPen(pen)
 
 			c.drawLine(path[0], path[1], path[2], path[3])
+
+		self._clipPath.moveTo(path[0], path[1])
+		self._clipPath.lineTo(path[2], path[3])
+		self._clipPath.moveTo(0, 0)
 
 		self.__drawingList.append(drawingFunc)
 		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[2], "endY" : path[3]})
@@ -538,21 +560,26 @@ class LGraphics(DisplayObject):
 		if len(path) < 4:
 			raise ValueError("parameter 'path' must have 4 items: [begin x, begin y, width, height].")
 
-		def drawingFunc(c):
-			pen = QtGui.QPen()
-			pen.setWidth(lineWidth)
-			pen.setColor(getColor(lineColor))
+		pen = QtGui.QPen()
+		pen.setWidth(lineWidth)
+		pen.setColor(getColor(lineColor))
 
+		brush = None
+
+		if isFill:
+			brush = QtGui.QBrush()
+			brush.setColor(getColor(fillColor))
+			brush.setStyle(QtCore.Qt.SolidPattern)
+
+		def drawingFunc(c):
 			c.setPen(pen)
 
 			if isFill:
-				brush = QtGui.QBrush()
-				brush.setColor(getColor(fillColor))
-				brush.setStyle(QtCore.Qt.SolidPattern)
-
 				c.setBrush(brush)
 
 			c.drawRect(path[0], path[1], path[2], path[3])
+
+		self._clipPath.addRect(path[0], path[1], path[2], path[3])
 
 		self.__drawingList.append(drawingFunc)
 		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[0] + path[2], "endY" : path[1] + path[3]})
@@ -561,25 +588,30 @@ class LGraphics(DisplayObject):
 		if len(path) < 5:
 			raise ValueError("parameter 'path' must have 6 items: [begin x, begin y, width, height, start angle, span angle].")
 
+		pen = QtGui.QPen()
+		pen.setWidth(lineWidth)
+		pen.setColor(getColor(lineColor))
+
+		brush = None
+
+		if isFill:
+			brush = QtGui.QBrush()
+			brush.setColor(getColor(fillColor))
+			brush.setStyle(QtCore.Qt.SolidPattern)
+
 		def drawingFunc(c):
 			m = c.drawArc
-
-			pen = QtGui.QPen()
-			pen.setWidth(lineWidth)
-			pen.setColor(getColor(lineColor))
 
 			c.setPen(pen)
 
 			if isFill:
-				brush = QtGui.QBrush()
-				brush.setColor(getColor(fillColor))
-				brush.setStyle(QtCore.Qt.SolidPattern)
-
 				c.setBrush(brush)
 
 				m = c.drawChord
 
 			m(path[0], path[1], path[2], path[3], path[4] * 16, path[5] * 16)
+
+		self._clipPath.arcTo(path[0], path[1], path[2], path[3], path[4] * 16, path[5] * 16)
 
 		self.__drawingList.append(drawingFunc)
 		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[0] + path[2], "endY" : path[1] + path[3]})
@@ -589,6 +621,91 @@ class LGraphics(DisplayObject):
 			raise ValueError("parameter 'path' must have 3 items: [begin x, begin y, radius].")
 
 		self.drawArc(lineWidth, lineColor, [path[0] - path[2], path[1] - path[2], path[2] * 2, path[2] * 2, 0, 360], isFill, fillColor)
+
+	def drawPolygon(self, lineWidth, lineColor, path, isFill = False, fillColor = "transparent"):
+		if len(path) < 3:
+			raise ValueError("parameter 'path' must have 3 items.")
+
+		onePoint = path[0]
+		otherPoints = path[1 :]
+		left = onePoint[0]
+		top = onePoint[1]
+		right = left
+		bottom = top
+
+		painterPath = QtGui.QPainterPath()
+		painterPath.moveTo(left, top)
+
+		for p in otherPoints:
+			cx = p[0]
+			cy = p[1]
+
+			if cx > right:
+				right = cx
+			elif cx < left:
+				left = cx
+
+			if cy > bottom:
+				bottom = cy
+			elif cy < top:
+				top = cy
+
+			painterPath.lineTo(cx, cy)
+
+		painterPath.closeSubpath()
+
+		pen = QtGui.QPen()
+		pen.setWidth(lineWidth)
+		pen.setColor(getColor(lineColor))
+
+		brush = None
+
+		if isFill:
+			brush = QtGui.QBrush()
+			brush.setColor(getColor(fillColor))
+			brush.setStyle(QtCore.Qt.SolidPattern)
+
+		def drawingFunc(c):
+			c.setPen(pen)
+
+			if isFill:
+				c.setBrush(brush)
+
+			c.drawPath(painterPath)
+
+		self._clipPath.addPath(painterPath)
+
+		self.__drawingList.append(drawingFunc)
+		self.__dataList.append({"startX" : left, "startY" : top, "endX" : right, "endY" : bottom})
+
+	def add(self, func):
+		if hasattr(func, "__call__"):
+			self.__drawingList.append(func)
+
+	def rect(self, x, y, width, height):
+		self._clipPath.addRect(x, y, width, height)
+
+	def arc(self, x, y, width, height, startAngle, spanAngle):
+		self._clipPath.arcTo(x, y, width, height, startAngle * 16, spanAngle * 16)
+
+	def circle(self, x, y, radius):
+		self.arc(x - radius, y - radius, radius * 2, radius * 2, 0, 360)
+
+	def polygon(self, path):
+		onePoint = path[0]
+		otherPoints = path[1 :]
+
+		painterPath = QtGui.QPainterPath()
+		painterPath.moveTo(left, top)
+
+		for p in otherPoints:
+			cx = p[0]
+			cy = p[1]
+
+			painterPath.lineTo(cx, cy)
+
+		painterPath.closeSubpath()
+		self._clipPath.addPath(painterPath)
 
 	def startX(self):
 		left = None
@@ -730,6 +847,7 @@ class Animation(Sprite):
 		self.playMode = AnimationPlayMode.HORIZONTAL
 		self.mirroring = False
 		self.speed = 0
+		self.currentFrame = frameList[0][0]
 		self.__speedIndex = 0
 		self.__loopIndex = 0
 		self.__currentDelay = 0
@@ -737,7 +855,7 @@ class Animation(Sprite):
 		self.__playing = False
 		
 		self.addChild(self.bitmap)
-		self.bitmapData.setProperties(0, 0, frameList[0][0].width, frameList[0][0].height)
+		self.bitmapData.setProperties(self.currentFrame.x, self.currentFrame.y, self.currentFrame.width, self.currentFrame.height)
 		self.addEventListener(Event.ENTER_FRAME, self.__onFrame)
 
 	@property
@@ -774,6 +892,8 @@ class Animation(Sprite):
 			currentRow = self.frameList[self.currentRow]
 			currentFrame = currentRow[self.currentColumn]
 
+			self.currentFrame = currentFrame
+
 			self.bitmap.scaleX = currentFrame.scaleX
 			self.bitmap.scaleY = currentFrame.scaleY
 			self.bitmap.rotation = currentFrame.rotation
@@ -791,6 +911,8 @@ class Animation(Sprite):
 
 			self.bitmapData.setProperties(currentFrame.x, currentFrame.y, currentFrame.width, currentFrame.height)
 
+			self.dispatchEvent(AnimationEvent.CHANGE_FRAME)
+
 			if self.playMode == AnimationPlayMode.VERTICAL:
 				rowPlayFlag = False
 
@@ -803,25 +925,25 @@ class Animation(Sprite):
 
 				completeCondition = lambda: self.currentRow >= len(self.frameList)
 
-
 			if completeCondition():
-				withinTimes = self.__loopWithinTimes()
-
-				if self.loop and withinTimes:
+				if self.loop and self.__loopWithinTimes():
 					if rowPlayFlag:
 						self.currentColumn = 0
 					else:
 						self.currentRow = 0
 				else:
 					self.__playing = False
-					self.__loopIndex = False
+					self.__loopIndex = 0
+
+					self.dispatchEvent(AnimationEvent.STOP)
+
 					if rowPlayFlag:
 						self.currentColumn = len(currentRow) - 1
 					else:
 						self.currentRow = len(self.frameList) - 1
 
 	def __loopWithinTimes(self):
-		if self.loopTimes is not None:
+		if self.loopTimes:
 			self.__loopIndex += 1
 
 			if self.__loopIndex < self.loopTimes:
@@ -836,12 +958,14 @@ class Animation(Sprite):
 	def play(self):
 		self.__playing = True
 
+		self.dispatchEvent(AnimationEvent.START)
+
 	def stop(self):
 		self.__playing = False
 
+		self.dispatchEvent(AnimationEvent.STOP)
+
 	def reset(self):
-		self.currentColumn = 0
-		self.currentRow = 0
 		self.__speedIndex = 0
 		self.__loopIndex = 0
 		self.__currentDelay = 0

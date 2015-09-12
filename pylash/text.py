@@ -46,6 +46,7 @@ class TextField(DisplayObject):
 		self.font = "Arial"
 		self.size = 15
 		self.textColor = "#000000"
+		self.backgroundColor = None
 		self.italic = False
 		self.weight = TextFormatWeight.NORMAL
 		self.textAlign = TextFormatAlign.LEFT
@@ -104,7 +105,19 @@ class TextField(DisplayObject):
 		flags = QtCore.Qt.AlignCenter
 		startX = self.__getTextStartX()
 		startY = self.__getTextStartY()
+		width = self.width
+		height = self.height
+
+		if self.backgroundColor:
+			brush = QtGui.QBrush()
+			brush.setColor(getColor(self.backgroundColor))
+			brush.setStyle(QtCore.Qt.SolidPattern)
+			c.setBrush(brush)
+
+			c.setPen(getColor("transparent"))
+
+			c.drawRect(startX, startY, width, height)
 
 		c.setFont(font)
 		c.setPen(getColor(self.textColor))
-		c.drawText(startX, startY, self.width, self.height, flags, self.text)
+		c.drawText(startX, startY, width, height, flags, self.text)
