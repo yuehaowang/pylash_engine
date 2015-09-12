@@ -34,6 +34,15 @@ class KeyboardEvent(Event):
 		raise Exception("KeyboardEvent cannot be instantiated.")
 
 
+class AnimationEvent(Event):
+	CHANGE_FRAME = Event("animation_change_frame")
+	STOP = Event("animation_stop")
+	START = Event("animation_start")
+
+	def __init__():
+		raise Exception("AnimationEvent cannot be instantiated.")
+
+
 class EventDispatcher(Object):
 	def __init__(self):
 		super(EventDispatcher, self).__init__()

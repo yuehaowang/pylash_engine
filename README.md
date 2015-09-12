@@ -23,7 +23,7 @@ The url to download the engine is:
 
 ## Before Using Pylash
 
-For pylash is based on Python3 and PyQt4, you need to install Python3 and PyQt4 first.
+For pylash is based on Python3 and PyQt4, you need to install them first.
 
 **Python3 will be found here:**
 

@@ -7,7 +7,7 @@ import sys
 
 sys.path.insert(0, "../../")
 from pylash.utils import init, addChild, removeChild, stage
-from pylash.display import Sprite, Bitmap, BitmapData, FPS
+from pylash.display import Sprite, Bitmap, BitmapData
 from pylash.text import TextField, TextFormatWeight
 from pylash.system import LoadManage
 from pylash.events import MouseEvent

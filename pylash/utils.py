@@ -61,7 +61,7 @@ class CanvasWidget(QtGui.QWidget):
 		if not s:
 			return
 
-		for o in s.keyboardEventList:
+		for o in s._keyboardEventList:
 			if o["eventType"] == eventType:
 				from .events import Event
 
@@ -82,33 +82,37 @@ class Stage(Object):
 		super(Stage, self).__init__()
 		
 		self.parent = "root"
-		self.keyboardEventList = []
 		self.width = 0
 		self.height = 0
 		self.speed = 0
 		self.app = None
-		self.canvasObj = None
+		self.canvasWidget = None
 		self.canvas = None
-		self.frameRate = None
+		self.timer = None
 		self.childList = []
 		self.backgroundColor = None
+		self._keyboardEventList = []
 
 	def _setCanvas(self, speed, title, width, height):
+		self.speed = speed
+		self.width = width
+		self.height = height
+
 		self.canvas = QtGui.QPainter()
 
-		self.canvasObj = CanvasWidget()
-		self.canvasObj.setWindowTitle(title)
-		self.canvasObj.setFixedSize(width, height)
-		self.canvasObj.show()
+		self.canvasWidget = CanvasWidget()
+		self.canvasWidget.setWindowTitle(title)
+		self.canvasWidget.setFixedSize(width, height)
+		self.canvasWidget.show()
 
-		self.frameRate = QtCore.QTimer()
-		self.frameRate.setInterval(speed)
-		self.frameRate.start();
+		self.timer = QtCore.QTimer()
+		self.timer.setInterval(speed)
+		self.timer.start();
 
-		QtCore.QObject.connect(self.frameRate, QtCore.SIGNAL("timeout()"), self.canvasObj, QtCore.SLOT("update()"))
+		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.canvasWidget, QtCore.SLOT("update()"))
 
 	def _onShow(self):
-		self.canvas.begin(self.canvasObj)
+		self.canvas.begin(self.canvasWidget)
 
 		if self.backgroundColor is not None:
 			self.canvas.fillRect(0, 0, self.width, self.height, getColor(self.backgroundColor))
@@ -125,14 +129,20 @@ class Stage(Object):
 				o._show(self.canvas)
 
 	def _enterMouseEvent(self, event, cd):
-		childList = list(self.childList)
-		childList.reverse()
+		childList = self.childList[:: -1]
 
 		currentCd = {"x" : cd["x"], "y" : cd["y"], "scaleX" : cd["scaleX"], "scaleY" : cd["scaleY"]}
 
 		for o in childList:
 			if hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(event, currentCd):
 				break
+
+	def setFrameRate(self, speed):
+		if not self.timer:
+			return
+
+		self.speed = speed
+		self.timer.setInterval(speed)
 
 	def addChild(self, child):
 		if child is not None:
@@ -155,7 +165,7 @@ class Stage(Object):
 
 		if hasattr(e, "eventType"):
 			if e.eventType == KeyboardEvent.KEY_DOWN.eventType or e.eventType == KeyboardEvent.KEY_UP.eventType:
-				self.keyboardEventList.append({
+				self._keyboardEventList.append({
 					"eventType" : e.eventType,
 					"listener" : listener
 				})
@@ -165,9 +175,9 @@ class Stage(Object):
 
 		if hasattr(e, "eventType"):
 			if e.eventType == KeyboardEvent.KEY_DOWN.eventType or e.eventType == KeyboardEvent.KEY_UP.eventType:
-				for i, o in enumerate(self.keyboardEventList):
+				for i, o in enumerate(self._keyboardEventList):
 					if o["eventType"] == e.eventType and o["listener"] == listener:
-						self.keyboardEventList.pop(i)
+						self._keyboardEventList.pop(i)
 
 stage = Stage()
 
@@ -185,10 +195,6 @@ for o in dir(QtCore.Qt):
 
 
 def init(speed, title, width, height, callback):
-	stage.speed = speed
-	stage.width = width
-	stage.height = height
-
 	stage.app = QtGui.QApplication(sys.argv)
 
 	stage._setCanvas(speed, title, width, height)
@@ -212,7 +218,7 @@ def removeChild(child):
 def getColor(color):
 	if isinstance(color, QtGui.QColor):
 		return color
-	elif color == "" or color is None:
+	elif not color:
 		return QtCore.Qt.transparent
 	else:
 		colorObj = QtGui.QColor()
