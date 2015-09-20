@@ -17,7 +17,10 @@ class TimeBar(Sprite):
 		self.leftTimeColor = "#CC00FF"
 		self.borderColor = "#6600FF"
 		
-		self.graphics.drawRect(3, self.borderColor, [0, 0, 20, stage.height * 0.75], True, self.usedTimeColor)
+		self.graphics.beginFill(self.usedTimeColor)
+		self.graphics.lineStyle(3, self.borderColor)
+		self.graphics.drawRect(0, 0, 20, stage.height * 0.75)
+		self.graphics.endFill()
 
 		# add loop event that will be dispatch when the page is redrawn
 		self.addEventListener(Event.ENTER_FRAME, self.loop)
@@ -39,6 +42,16 @@ class TimeBar(Sprite):
 
 		# redraw the time bar
 		self.graphics.clear()
-		self.graphics.drawRect(0, "", [0, 0, 20, barHeight], True, self.usedTimeColor)
-		self.graphics.drawRect(0, "", [0, startX, 20, barHeight - startX], True, self.leftTimeColor)
-		self.graphics.drawRect(3, self.borderColor, [0, 0, 20, barHeight])
+
+		self.graphics.beginFill(self.usedTimeColor)
+		self.graphics.drawRect(0, 0, 20, barHeight)
+		self.graphics.endFill()
+
+		self.graphics.beginFill(self.leftTimeColor)
+		self.graphics.drawRect(0, startX, 20, barHeight - startX)
+		self.graphics.endFill()
+
+		self.graphics.beginFill()
+		self.graphics.lineStyle(3, self.borderColor)
+		self.graphics.drawRect(0, 0, 20, barHeight)
+		self.graphics.endFill()

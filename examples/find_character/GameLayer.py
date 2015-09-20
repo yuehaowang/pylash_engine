@@ -45,7 +45,10 @@ class GameLayer(Sprite):
 				block = Sprite()
 				block.x = j * 50
 				block.y = i * 50
-				block.graphics.drawRect(5, "#0066FF", [0, 0, 50, 50], True, "#33CCFF")
+				block.graphics.beginFill("#33CCFF")
+				block.graphics.lineStyle(5, "#0066FF")
+				block.graphics.drawRect(0, 0, 50, 50)
+				block.graphics.endFill()
 				self.blockLayer.addChild(block)
 
 				txt = TextField()
@@ -112,7 +115,10 @@ class GameLayer(Sprite):
 
 		# add a botton used for restart
 		restartBtn = Sprite()
-		restartBtn.graphics.drawRect(3, "orangered", [0, 0, 200, 60], True, "yellow")
+		restartBtn.graphics.beginFill("yellow")
+		restartBtn.graphics.lineStyle(3, "orangered")
+		restartBtn.graphics.drawRect(0, 0, 200, 60)
+		restartBtn.graphics.endFill()
 		restartBtn.x = (stage.width - restartBtn.width) / 2
 		restartBtn.y = resultLayer.height + 50
 		resultLayer.addChild(restartBtn)
