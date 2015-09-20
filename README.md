@@ -1,7 +1,7 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.0.0**
+**Latest Version: 1.1.0**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -48,14 +48,22 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 ## Changelog
 
+#### version 1.1.0
+
+1. Improvement: changed and added some methods in `Graphics`
+2. Added settings of `join style`, `cap style` and `miter limit` in `Graphics`
+
 #### version 1.0.0
 
-Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules
+Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules.
 
 
 ## Get Started
 
-Writing...
+- [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
+- [A Simple Program: Hello World](https://github.com/yuehaowang/pylash_engine/wiki/A-Simple-Program:-Hello-World)
+- [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
+- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
 
 ## Documentation
 

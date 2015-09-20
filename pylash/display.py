@@ -514,173 +514,205 @@ class Sprite(DisplayObjectContainer):
 		return self.endY() - self.startY()
 
 
+class JoinStyle(Object):
+	MITER = "miter"
+	ROUND = "round"
+	BEVEL = "bevel"
+
+	def __init__(self):
+		raise Exception("JoinStyle cannot be instantiated.")
+
+
+class CapsStyle(Object):
+	NONE = "none"
+	SQUARE = "square"
+	ROUND = "round"
+
+	def __init__(self):
+		raise Exception("CapsStyle cannot be instantiated.")
+
+
 class Graphics(DisplayObject):
 	def __init__(self):
 		super(Graphics, self).__init__()
 		
 		self.__drawingList = []
 		self.__dataList = []
+		self.__currentGraphics = None
 		self._clipPath = QtGui.QPainterPath()
 
 	def _show(self, c):
-		for drawingFunc in self.__drawingList:
+		for item in self.__drawingList:
+			if not isinstance(item, dict):
+				return
+
+			path = item["path"]
+
+			if not path:
+				continue
+
+			lineWidth = item["lineWidth"]
+			lineColor = item["lineColor"]
+			fillColor = item["fillColor"]
+			joins = item["joins"]
+			caps = item["caps"]
+			miterLimit = item["miterLimit"]
+			fillAlpha = item["fillAlpha"]
+			lineAlpha = item["lineAlpha"]
+
 			c.save()
 
-			drawingFunc(c)
+			brush = None
+			pen = QtGui.QPen()
+
+			if lineWidth:
+				pen.setWidth(lineWidth)
+			else:
+				pen.setWidth(0)
+
+			if lineColor:
+				color = getColor(lineColor)
+
+				if lineAlpha:
+					color.setAlpha(lineAlpha)
+
+				pen.setColor(color)
+			else:
+				pen.setColor(getColor("transparent"))
+
+			if joins:
+				pen.setJoinStyle(joins)
+
+			if caps:
+				pen.setCapStyle(caps)
+
+			if miterLimit:
+				pen.setMiterLimit(miterLimit)
+
+			if fillColor:
+				color = getColor(fillColor)
+
+				if fillAlpha:
+					color.setAlpha(fillAlpha)
+
+				brush = QtGui.QBrush()
+				brush.setColor(color)
+				brush.setStyle(QtCore.Qt.SolidPattern)
+
+				c.setBrush(brush)
+
+			c.setPen(pen)
+			c.drawPath(path)
 
 			c.restore()
 
 	def clear(self):
 		self.__drawingList = []
 		self.__dataList = []
+		self.__currentGraphics = None
 		del self._clipPath
 		self._clipPath = QtGui.QPainterPath()
 
-	def drawLine(self, lineWidth, lineColor, path):
-		if len(path) < 4:
-			raise ValueError("parameter 'path' must have 4 items: [begin x, begin y, end x, end y].")
+	def beginFill(self, color = "transparent", alpha = 1):
+		if color == "transparent":
+			alpha = 0
 
-		pen = QtGui.QPen()
-		pen.setWidth(lineWidth)
-		pen.setColor(getColor(lineColor))
+		self.__currentGraphics = {
+			"path" : QtGui.QPainterPath(),
+			"lineAlpha" : 255,
+			"lineWidth" : None,
+			"lineColor" : None,
+			"fillColor" : color,
+			"fillAlpha" : 255 * alpha,
+			"joins" : None,
+			"caps" : None,
+			"miterLimit" : None
+		}
 
-		def drawingFunc(c):
-			c.setPen(pen)
+	def endFill(self):
+		if not self.__currentGraphics:
+			return
 
-			c.drawLine(path[0], path[1], path[2], path[3])
+		self.__currentGraphics["path"].setFillRule(QtCore.Qt.WindingFill)
 
-		self._clipPath.moveTo(path[0], path[1])
-		self._clipPath.lineTo(path[2], path[3])
-		self._clipPath.moveTo(0, 0)
+		self.__drawingList.append(self.__currentGraphics)
 
-		self.__drawingList.append(drawingFunc)
-		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[2], "endY" : path[3]})
+	def lineStyle(self, thickness = 0, color = "transparent", alpha = 1, joints = None, caps = None, miterLimit = 3):
+		if not self.__currentGraphics:
+			return
 
-	def drawRect(self, lineWidth, lineColor, path, isFill = False, fillColor = "transparent"):
-		if len(path) < 4:
-			raise ValueError("parameter 'path' must have 4 items: [begin x, begin y, width, height].")
+		if color == "transparent":
+			alpha = 0
 
-		pen = QtGui.QPen()
-		pen.setWidth(lineWidth)
-		pen.setColor(getColor(lineColor))
+		if joints == JoinStyle.ROUND:
+			joints = QtCore.Qt.RoundJoin
+		elif joints == JoinStyle.MITER:
+			joints = QtCore.Qt.MiterJoin
+		elif joints == JoinStyle.BEVEL:
+			joints = QtCore.Qt.BevelJoin
 
-		brush = None
+		if caps == CapsStyle.NONE:
+			caps = QtCore.Qt.FlatCap
+		elif caps == CapsStyle.SQUARE:
+			caps = QtCore.Qt.SquareCap
+		elif caps == CapsStyle.ROUND:
+			caps = QtCore.Qt.RoundCap
 
-		if isFill:
-			brush = QtGui.QBrush()
-			brush.setColor(getColor(fillColor))
-			brush.setStyle(QtCore.Qt.SolidPattern)
+		self.__currentGraphics["lineWidth"] = thickness
+		self.__currentGraphics["lineColor"] = color
+		self.__currentGraphics["lineAlpha"] = 255 * alpha
+		self.__currentGraphics["joints"] = joints
+		self.__currentGraphics["caps"] = caps
+		self.__currentGraphics["miterLimit"] = miterLimit
 
-		def drawingFunc(c):
-			c.setPen(pen)
+	def moveTo(self, x, y):
+		if not self.__currentGraphics:
+			return
 
-			if isFill:
-				c.setBrush(brush)
+		self.__currentGraphics["path"].moveTo(x, y)
 
-			c.drawRect(path[0], path[1], path[2], path[3])
+		self._clipPath.moveTo(x, y)
 
-		self._clipPath.addRect(path[0], path[1], path[2], path[3])
+	def lineTo(self, x, y):
+		if not self.__currentGraphics:
+			return
 
-		self.__drawingList.append(drawingFunc)
-		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[0] + path[2], "endY" : path[1] + path[3]})
+		self.__currentGraphics["path"].lineTo(x, y)
 
-	def drawArc(self, lineWidth, lineColor, path, isFill = False, fillColor = "transparent"):
-		if len(path) < 5:
-			raise ValueError("parameter 'path' must have 6 items: [begin x, begin y, width, height, start angle, span angle].")
+		self._clipPath.lineTo(x, y)
 
-		pen = QtGui.QPen()
-		pen.setWidth(lineWidth)
-		pen.setColor(getColor(lineColor))
+	def drawRect(self, x, y, width, height):
+		if not self.__currentGraphics:
+			return
 
-		brush = None
+		self.__currentGraphics["path"].addRect(x, y, width, height)
 
-		if isFill:
-			brush = QtGui.QBrush()
-			brush.setColor(getColor(fillColor))
-			brush.setStyle(QtCore.Qt.SolidPattern)
+		self._clipPath.addRect(x, y, width, height)
+		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x + width, "endY" : y + height})
 
-		def drawingFunc(c):
-			m = c.drawArc
+	def drawCircle(self, x, y, radius):
+		self.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
 
-			c.setPen(pen)
+	def drawEllipse(self, x, y, width, height):
+		if not self.__currentGraphics:
+			return
 
-			if isFill:
-				c.setBrush(brush)
+		self.__currentGraphics["path"].addEllipse(x, y, width, height)
 
-				m = c.drawChord
+		self._clipPath.addEllipse(x, y, width, height)
+		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x + width, "endY" : y + height})
 
-			m(path[0], path[1], path[2], path[3], path[4] * 16, path[5] * 16)
+	def drawRoundRect(self, x, y, width, height, ellipseWidth, ellipseHeight = None):
+		if not self.__currentGraphics:
+			return
 
-		self._clipPath.arcTo(path[0], path[1], path[2], path[3], path[4] * 16, path[5] * 16)
+		if not ellipseHeight:
+			ellipseHeight = ellipseWidth
 
-		self.__drawingList.append(drawingFunc)
-		self.__dataList.append({"startX" : path[0], "startY" : path[1], "endX" : path[0] + path[2], "endY" : path[1] + path[3]})
+		self.__currentGraphics["path"].addRoundedRect(x, y, width, height, ellipseWidth, ellipseHeight)
 
-	def drawCircle(self, lineWidth, lineColor, path, isFill = False, fillColor = "transparent"):
-		if len(path) < 3:
-			raise ValueError("parameter 'path' must have 3 items: [begin x, begin y, radius].")
-
-		self.drawArc(lineWidth, lineColor, [path[0] - path[2], path[1] - path[2], path[2] * 2, path[2] * 2, 0, 360], isFill, fillColor)
-
-	def drawPolygon(self, lineWidth, lineColor, path, isFill = False, fillColor = "transparent"):
-		if len(path) < 3:
-			raise ValueError("parameter 'path' must have 3 items.")
-
-		onePoint = path[0]
-		otherPoints = path[1 :]
-		left = onePoint[0]
-		top = onePoint[1]
-		right = left
-		bottom = top
-
-		painterPath = QtGui.QPainterPath()
-		painterPath.moveTo(left, top)
-
-		for p in otherPoints:
-			cx = p[0]
-			cy = p[1]
-
-			if cx > right:
-				right = cx
-			elif cx < left:
-				left = cx
-
-			if cy > bottom:
-				bottom = cy
-			elif cy < top:
-				top = cy
-
-			painterPath.lineTo(cx, cy)
-
-		painterPath.closeSubpath()
-
-		pen = QtGui.QPen()
-		pen.setWidth(lineWidth)
-		pen.setColor(getColor(lineColor))
-
-		brush = None
-
-		if isFill:
-			brush = QtGui.QBrush()
-			brush.setColor(getColor(fillColor))
-			brush.setStyle(QtCore.Qt.SolidPattern)
-
-		def drawingFunc(c):
-			c.setPen(pen)
-
-			if isFill:
-				c.setBrush(brush)
-
-			c.drawPath(painterPath)
-
-		self._clipPath.addPath(painterPath)
-
-		self.__drawingList.append(drawingFunc)
-		self.__dataList.append({"startX" : left, "startY" : top, "endX" : right, "endY" : bottom})
-
-	def add(self, func):
-		if hasattr(func, "__call__"):
-			self.__drawingList.append(func)
+		self._clipPath.addRoundedRect(x, y, width, height, ellipseWidth, ellipseHeight)
+		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x + width, "endY" : y + height})
 
 	def rect(self, x, y, width, height):
 		self._clipPath.addRect(x, y, width, height)
@@ -690,22 +722,6 @@ class Graphics(DisplayObject):
 
 	def circle(self, x, y, radius):
 		self.arc(x - radius, y - radius, radius * 2, radius * 2, 0, 360)
-
-	def polygon(self, path):
-		onePoint = path[0]
-		otherPoints = path[1 :]
-
-		painterPath = QtGui.QPainterPath()
-		painterPath.moveTo(left, top)
-
-		for p in otherPoints:
-			cx = p[0]
-			cy = p[1]
-
-			painterPath.lineTo(cx, cy)
-
-		painterPath.closeSubpath()
-		self._clipPath.addPath(painterPath)
 
 	def startX(self):
 		left = None
@@ -799,7 +815,9 @@ class FPS(Sprite):
 			self.__txt.text = str(self.__count)
 
 			self.__background.graphics.clear()
-			self.__background.graphics.drawRect(0, "", [0, 0, self.__txt.width, self.__txt.height], True, "black")
+			self.__background.graphics.beginFill("black")
+			self.__background.graphics.drawRect(0, 0, self.__txt.width, self.__txt.height)
+			self.__background.graphics.endFill()
 
 			self.__count = 0
 
