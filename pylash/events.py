@@ -1,4 +1,4 @@
-from .utils import Object
+from .utils import Object, removeItemsInList
 
 
 __author__ = "Yuehao Wang"
@@ -20,6 +20,8 @@ class MouseEvent(Event):
 	MOUSE_DOWN = Event("mouse_down")
 	MOUSE_UP = Event("mouse_up")
 	MOUSE_MOVE = Event("mouse_move")
+	MOUSE_OVER = Event("mouse_over")
+	MOUSE_OUT = Event("mouse_out")
 	DOUBLE_CLICK = Event("mouse_dbclick")
 
 	def __init__():
@@ -67,12 +69,13 @@ class EventDispatcher(Object):
 		eventList = []
 
 	def _removeEventListenerInList(self, e, listener, eventList):
-		for i, o in enumerate(eventList):
+		def condition(o):
 			t = o["eventType"]
 			l = o["listener"]
 
-			if l == listener and self.__isEventTypeEqual(e, t):
-				eventList.pop(i)
+			return (l == listener and self.__isEventTypeEqual(e, t))
+
+		removeItemsInList(eventList, condition)
 
 	def _dispatchEventInList(self, e, eventList):
 		for o in eventList:

@@ -10,9 +10,10 @@ import sys
 sys.path.insert(0, "../../")
 from pylash.utils import stage, init, addChild, KeyCode
 from pylash.system import LoadManage
-from pylash.display import Sprite, Animation, BitmapData, Bitmap, FPS
+from pylash.display import Sprite, BitmapData, Bitmap, FPS
 from pylash.text import TextField, TextFormatWeight
 from pylash.events import MouseEvent, Event, KeyboardEvent
+from pylash.ui import LoadingSample1
 
 dataList = {}
 
@@ -40,8 +41,17 @@ def main():
 		{"name" : "item7", "path" : "./images/item7.png"}
 	]
 
+	# create loading page
+	loadingPage = LoadingSample1()
+	addChild(loadingPage)
+
+	def loadComplete(result):
+		loadingPage.remove()
+
+		gameInit(result)
+
 	# load files
-	LoadManage.load(loadList, None, gameInit)
+	LoadManage.load(loadList, loadingPage.setProgress, loadComplete)
 
 def gameInit(result):
 	global dataList, stageLayer
@@ -233,4 +243,4 @@ def gameOver(e):
 	# add double click event to restart
 	stageLayer.addEventListener(MouseEvent.DOUBLE_CLICK, startGame)
 
-init(1000/60, "Get Fruits", 800, 600, main)
+init(1000 / 60, "Get Fruits", 800, 600, main)

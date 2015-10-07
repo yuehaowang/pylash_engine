@@ -56,7 +56,7 @@ class TextField(DisplayObject):
 		font = self.__getFont()
 		fontMetrics = QtGui.QFontMetrics(font)
 
-		return fontMetrics.width(self.text)
+		return fontMetrics.width(str(self.text))
 
 	def _getOriginalHeight(self):
 		font = self.__getFont()
@@ -108,6 +108,9 @@ class TextField(DisplayObject):
 		width = self.width
 		height = self.height
 
+		pen = QtGui.QPen()
+		pen.setBrush(QtGui.QBrush(getColor(self.textColor)))
+
 		if self.backgroundColor:
 			brush = QtGui.QBrush()
 			brush.setColor(getColor(self.backgroundColor))
@@ -119,5 +122,5 @@ class TextField(DisplayObject):
 			c.drawRect(startX, startY, width, height)
 
 		c.setFont(font)
-		c.setPen(getColor(self.textColor))
-		c.drawText(startX, startY, width, height, flags, self.text)
+		c.setPen(pen)
+		c.drawText(startX, startY, width, height, flags, str(self.text))
