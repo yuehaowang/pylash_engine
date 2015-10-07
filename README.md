@@ -1,7 +1,7 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.1.0**
+**Latest Version: 1.2.0**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -39,21 +39,46 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 - **Find Character**
 
-![Demo 1](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo1.png)
+![Demo 1](http://wyh.wjjsoft.com/album/pylash_demo1.png)
 
 - **Get Fruits**
 
-![Demo 2](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo2.png)
+![Demo 2](http://wyh.wjjsoft.com/album/pylash_demo2.png)
+
+- **Tower Defense**
+
+![Demo 2](http://wyh.wjjsoft.com/album/pylash_demo3.png)
 
 
 ## Changelog
 
+#### version 1.2.0
+
+*Release Date: 10/7/2015*
+
+1. Added some sample classes about loading page.
+2. Added `Button` class to create a simple button.
+3. Added `LinearGradientColor`, `RadialGradientColor` and `ConicalGradientColor` class to use gradient color.
+4. Added `delay` property in `LoadManage` class to set the delay time between loading a resource and loading the next resource in order to show loading page.
+5. Added `useAntialiasing` property in `stage` in order to open/close antialiasing.
+6. Bugfix: `onComplete` callback function will be called in the thread used for loading resources in `LoadManage`.
+7. Bugfix: `PyQt` will throw errors if `text` property of `TextField` is set to a value whose type is not `str`.
+8. Added `mouseShelter` property in `DisplayObjectContainer` to set whether stop propagating mouse events to `DisplayObjectContainer` objects that are sheltered by other objects.
+9. Bugfix: `selfY` in mouse event is wrong.
+10. Enhancement: the `x` and `y` property in parameter 'bitmapData' given into the constructor of `Animation` class will be the origin position of the animation.
+11. Added `AnimationSet` class to control a set of animations.
+12. Added `MOUSE_OVER` and `MOUSE_OUT` event.
+
 #### version 1.1.0
 
-1. Improvement: changed and added some methods in `Graphics`
-2. Added settings of `join style`, `cap style` and `miter limit` in `Graphics`
+*Release Date: 9/20/2015*
 
-#### version 1.0.0
+1. Improvement: changed and added some methods in `Graphics`.
+2. Added settings of `join style`, `cap style` and `miter limit` in `Graphics`.
+
+#### version 1.0.0 
+
+*Release Date: 9/12/2015*
 
 Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules.
 

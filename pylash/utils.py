@@ -24,38 +24,35 @@ class CanvasWidget(QtGui.QWidget):
 		stage._onShow()
 
 	def mousePressEvent(self, event):
-		from .events import MouseEvent
-		
-		self.__enterMouseEvent(event, MouseEvent.MOUSE_DOWN.eventType)
+		self.__enterMouseEvent(event, "mouse_down")
 
 	def mouseMoveEvent(self, event):
-		from .events import MouseEvent
+		stage.useHandCursor = False
 
-		self.__enterMouseEvent(event, MouseEvent.MOUSE_MOVE.eventType)
+		self.__enterMouseEvent(event, "mouse_move")
+
+		if stage.useHandCursor:
+			self.setCursor(QtCore.Qt.PointingHandCursor)
+		else:
+			self.setCursor(QtCore.Qt.ArrowCursor)
 
 	def mouseReleaseEvent(self, event):
-		from .events import MouseEvent
-
-		self.__enterMouseEvent(event, MouseEvent.MOUSE_UP.eventType)
+		self.__enterMouseEvent(event, "mouse_up")
 
 	def mouseDoubleClickEvent(self, event):
-		from .events import MouseEvent
-
-		self.__enterMouseEvent(event, MouseEvent.DOUBLE_CLICK.eventType)
+		self.__enterMouseEvent(event, "mouse_dbclick")
 
 	def keyPressEvent(self, event):
 		if not event.isAutoRepeat():
-			from .events import KeyboardEvent
-		
-			self.__enterKeyboardEvent(event, KeyboardEvent.KEY_DOWN.eventType)
+			self.__enterKeyboardEvent(event, "key_down")
 
 	def keyReleaseEvent(self, event):
 		if not event.isAutoRepeat():
-			from .events import KeyboardEvent
-
-			self.__enterKeyboardEvent(event, KeyboardEvent.KEY_UP.eventType)
+			self.__enterKeyboardEvent(event, "key_up")
 
 	def __enterKeyboardEvent(self, event, eventType):
+		from .events import Event
+
 		s = stage
 
 		if not s:
@@ -63,8 +60,6 @@ class CanvasWidget(QtGui.QWidget):
 
 		for o in s._keyboardEventList:
 			if o["eventType"] == eventType:
-				from .events import Event
-
 				eve = Event(eventType)
 				eve.keyCode = event.key()
 				eve.keyText = event.text()
@@ -91,8 +86,10 @@ class Stage(Object):
 		self.timer = None
 		self.childList = []
 		self.backgroundColor = None
+		self.useAntialiasing = True
+		self.useHandCursor = False
 		self._keyboardEventList = []
-
+	
 	def _setCanvas(self, speed, title, width, height):
 		self.speed = speed
 		self.width = width
@@ -114,6 +111,11 @@ class Stage(Object):
 	def _onShow(self):
 		self.canvas.begin(self.canvasWidget)
 
+		if self.useAntialiasing:
+			self.canvas.setRenderHint(QtGui.QPainter.Antialiasing, True)
+		else:
+			self.canvas.setRenderHint(QtGui.QPainter.Antialiasing, False)
+
 		if self.backgroundColor is not None:
 			self.canvas.fillRect(0, 0, self.width, self.height, getColor(self.backgroundColor))
 		else:
@@ -121,7 +123,7 @@ class Stage(Object):
 
 		self._showDisplayList(self.childList)
 
-		self.canvas.end();
+		self.canvas.end()
 
 	def _showDisplayList(self, childList):
 		for o in childList:
@@ -150,7 +152,7 @@ class Stage(Object):
 			
 			self.childList.append(child)
 		else:
-			raise ValueError("parameter 'child' must be a display object.")
+			raise TypeError("parameter 'child' must be a display object.")
 
 	def removeChild(self, child):
 		if child is not None:
@@ -158,23 +160,19 @@ class Stage(Object):
 			
 			child.parent = None
 		else:
-			raise ValueError("parameter 'child' must be a display object.")
+			raise TypeError("parameter 'child' must be a display object.")
 
 	def addEventListener(self, e, listener):
-		from .events import KeyboardEvent
-
 		if hasattr(e, "eventType"):
-			if e.eventType == KeyboardEvent.KEY_DOWN.eventType or e.eventType == KeyboardEvent.KEY_UP.eventType:
+			if e.eventType == "key_down" or e.eventType == "key_up":
 				self._keyboardEventList.append({
 					"eventType" : e.eventType,
 					"listener" : listener
 				})
 
 	def removeEventListener(self, e, listener):
-		from .events import KeyboardEvent
-
 		if hasattr(e, "eventType"):
-			if e.eventType == KeyboardEvent.KEY_DOWN.eventType or e.eventType == KeyboardEvent.KEY_UP.eventType:
+			if e.eventType == "key_down" or e.eventType == "key_up":
 				for i, o in enumerate(self._keyboardEventList):
 					if o["eventType"] == e.eventType and o["listener"] == listener:
 						self._keyboardEventList.pop(i)
@@ -200,7 +198,7 @@ def init(speed, title, width, height, callback):
 	stage._setCanvas(speed, title, width, height)
 
 	if not hasattr(callback, "__call__"):
-		raise ValueError("parameter 'callback' must be a function.")
+		raise TypeError("parameter 'callback' must be a function.")
 
 	callback()
 
@@ -216,8 +214,10 @@ def removeChild(child):
 
 	
 def getColor(color):
-	if isinstance(color, QtGui.QColor):
+	if isinstance(color, QtGui.QColor) or isinstance(color, QtGui.QGradient):
 		return color
+	elif hasattr(color, "addColorStop"):
+		return color.value
 	elif not color:
 		return QtCore.Qt.transparent
 	else:
@@ -225,3 +225,19 @@ def getColor(color):
 		colorObj.setNamedColor(color)
 
 		return colorObj
+
+
+def removeItemsInList(theList, condition):
+	if not hasattr(condition, "__call__") or not isinstance(theList, list):
+		return
+
+	targetList = []
+
+	for o in theList:
+		if condition(o):
+			targetList.append(o)
+
+	for i in targetList:
+		theList.remove(i)
+
+	return targetList

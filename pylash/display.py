@@ -1,6 +1,6 @@
 import time
 from PyQt4 import QtGui, QtCore
-from .utils import Object, stage, getColor, Stage
+from .utils import Object, stage, getColor, Stage, removeItemsInList
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
 
 
@@ -73,7 +73,7 @@ class DisplayObject(EventDispatcher):
 		c.setCompositionMode(self.__getCompositionMode())
 
 		if self._hasMask():
-			c.setClipPath(self.mask._clipPath)
+			c.setClipPath(self.mask._clipPath, QtCore.Qt.UniteClip)
 			c.clipPath()
 
 		self._loopDraw(c)
@@ -81,9 +81,12 @@ class DisplayObject(EventDispatcher):
 		c.restore()
 
 	def _hasMask(self):
-		return isinstance(self.mask, DisplayObject) and isinstance(self.mask._clipPath, QtGui.QPainterPath)
+		return isinstance(self.mask, DisplayObject) and hasattr(self.mask, "_clipPath") and isinstance(self.mask._clipPath, QtGui.QPainterPath)
 
 	def _isMouseOn(self, e, cd):
+		if not self.visible:
+			return
+
 		ox = e["offsetX"]
 		oy = e["offsetY"]
 		x = cd["x"]
@@ -152,6 +155,8 @@ class BlendMode(Object):
 
 
 class Loader(DisplayObject):
+	ignoreLoadingError = False
+
 	def __init__(self):
 		super(Loader, self).__init__()
 
@@ -162,6 +167,9 @@ class Loader(DisplayObject):
 		image.load(url)
 
 		self.content = image
+
+		if image.isNull() and not Loader.ignoreLoadingError:
+			raise Exception("Loader cannot load data in the path you give.")
 
 		e = Event(Event.COMPLETE)
 		e.target = image
@@ -263,6 +271,7 @@ class InteractiveObject(DisplayObject):
 		super(InteractiveObject, self).__init__()
 		
 		self._mouseEventList = []
+		self._mouseOver = False
 		self.mouseEnabled = True
 
 	def __isMouseEvent(self, e):
@@ -304,6 +313,7 @@ class DisplayObjectContainer(InteractiveObject):
 
 		self.childList = []
 		self.mouseChildren = True
+		self.mouseShelter = True
 
 	@property
 	def numChildren(self):
@@ -322,6 +332,8 @@ class DisplayObjectContainer(InteractiveObject):
 				childList.append(child)
 			elif isinstance(index, int) and index < len(childList):
 				childList.insert(index, child)
+		else:
+			raise TypeError("parameter 'child' must be a display object.")
 
 	def addChildAt(self, child, index):
 		self.addChild(child, index)
@@ -333,7 +345,7 @@ class DisplayObjectContainer(InteractiveObject):
 		childList = self.childList
 
 		if not isinstance(child, DisplayObject):
-			return
+			raise TypeError("parameter 'child' must be a display object.")
 
 		childList.remove(child)
 
@@ -377,6 +389,7 @@ class Sprite(DisplayObjectContainer):
 
 		self.graphics = Graphics()
 		self.graphics.parent = self
+		self.useHandCursor = False
 		self._clipPath = self.graphics._clipPath
 
 	def _loopDraw(self, c):
@@ -440,6 +453,9 @@ class Sprite(DisplayObjectContainer):
 		}
 
 	def _isMouseOn(self, e, cd):
+		if not self.visible:
+			return
+
 		childList = self.childList[::-1]
 		
 		if not self._hasMask():
@@ -463,30 +479,62 @@ class Sprite(DisplayObjectContainer):
 		return False
 
 	def _enterMouseEvent(self, e, cd):
-		childList = self.childList[::-1]
+		if not self.visible:
+			return
 
 		currentCd = self.__getVisualCoordinate(cd, self)
 
 		isOn = self._isMouseOn(e, currentCd)
-		
+
 		if isOn:
+			if self.useHandCursor:
+				stage.useHandCursor = True
+
+			if e["eventType"] == MouseEvent.MOUSE_MOVE.eventType and not self._mouseOver:
+				self._mouseOver = True
+
+				e["eventType"] = MouseEvent.MOUSE_OVER.eventType
+
+				self.__dispatchMouseEvent(e, currentCd)
+
+				e["eventType"] = MouseEvent.MOUSE_MOVE.eventType
+
 			if self.mouseChildren:
-				for o in childList:
-					childCd = {
-						"x" : currentCd["x"],
-						"y" : currentCd["y"],
-						"scaleX" : currentCd["scaleX"],
-						"scaleY" : currentCd["scaleY"]
-					}
-					
-					if (hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(e, childCd)):
+				for o in self.childList[::-1]:					
+					if (hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(e, currentCd)):
 						break
 						
 			self.__dispatchMouseEvent(e, currentCd)
 
-			return True
+			if self.mouseShelter:
+				return True
+			else:
+				return False
+		elif e["eventType"] == MouseEvent.MOUSE_MOVE.eventType and self._mouseOver:
+			self._mouseOutEvent(e, cd)
 
 		return False
+
+	def _mouseOutEvent(self, e, cd):
+		if not self.visible:
+			return
+
+		currentCd = self.__getVisualCoordinate(cd, self)
+
+		stage.useHandCursor = False
+
+		self._mouseOver = False
+
+		if self.mouseChildren:
+			for o in self.childList[::-1]:
+				if (hasattr(o, "_mouseOutEvent") and hasattr(o._mouseOutEvent, "__call__") and o._mouseOutEvent(e, currentCd)):
+					break
+
+		e["eventType"] = MouseEvent.MOUSE_OUT.eventType
+
+		self.__dispatchMouseEvent(e, currentCd)
+
+		e["eventType"] = MouseEvent.MOUSE_MOVE.eventType
 
 	def __dispatchMouseEvent(self, e, cd):
 		if not self.mouseEnabled:
@@ -501,7 +549,7 @@ class Sprite(DisplayObjectContainer):
 				eve.offsetX = e["offsetX"]
 				eve.offsetY = e["offsetY"]
 				eve.selfX = (e["offsetX"] - cd["x"]) / cd["scaleX"]
-				eve.selfY = (e["offsetX"] - cd["y"]) / cd["scaleY"]
+				eve.selfY = (e["offsetY"] - cd["y"]) / cd["scaleY"]
 				eve.target = e["target"]
 				eve.currentTarget = self
 
@@ -560,10 +608,10 @@ class Graphics(DisplayObject):
 			fillAlpha = item["fillAlpha"]
 			lineAlpha = item["lineAlpha"]
 
-			c.save()
-
 			brush = None
 			pen = QtGui.QPen()
+
+			c.save()
 
 			if lineWidth:
 				pen.setWidth(lineWidth)
@@ -592,12 +640,19 @@ class Graphics(DisplayObject):
 			if fillColor:
 				color = getColor(fillColor)
 
-				if fillAlpha:
+				if fillAlpha and hasattr(color, "setAlpha"):
 					color.setAlpha(fillAlpha)
 
-				brush = QtGui.QBrush()
-				brush.setColor(color)
-				brush.setStyle(QtCore.Qt.SolidPattern)
+				brush = QtGui.QBrush(color)
+
+				if isinstance(fillColor, LinearGradientColor):
+					brush.setStyle(QtCore.Qt.LinearGradientPattern)
+				elif isinstance(fillColor, RadialGradientColor):
+					brush.setStyle(QtCore.Qt.RadialGradientPattern)
+				elif isinstance(fillColor, ConicalGradientColor):
+					brush.setStyle(QtCore.Qt.ConicalGradientPattern)
+				else:
+					brush.setStyle(QtCore.Qt.SolidPattern)
 
 				c.setBrush(brush)
 
@@ -637,7 +692,7 @@ class Graphics(DisplayObject):
 
 		self.__drawingList.append(self.__currentGraphics)
 
-	def lineStyle(self, thickness = 0, color = "transparent", alpha = 1, joints = None, caps = None, miterLimit = 3):
+	def lineStyle(self, thickness = 1, color = "black", alpha = 1, joints = None, caps = None, miterLimit = 3):
 		if not self.__currentGraphics:
 			return
 
@@ -714,15 +769,6 @@ class Graphics(DisplayObject):
 		self._clipPath.addRoundedRect(x, y, width, height, ellipseWidth, ellipseHeight)
 		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x + width, "endY" : y + height})
 
-	def rect(self, x, y, width, height):
-		self._clipPath.addRect(x, y, width, height)
-
-	def arc(self, x, y, width, height, startAngle, spanAngle):
-		self._clipPath.arcTo(x, y, width, height, startAngle * 16, spanAngle * 16)
-
-	def circle(self, x, y, radius):
-		self.arc(x - radius, y - radius, radius * 2, radius * 2, 0, 360)
-
 	def startX(self):
 		left = None
 
@@ -772,6 +818,9 @@ class Graphics(DisplayObject):
 		return bottom
 
 	def _isMouseOn(self, e, cd):
+		if not self.visible:
+			return
+
 		ox = e["offsetX"]
 		oy = e["offsetY"]
 		x = cd["x"]
@@ -866,6 +915,8 @@ class Animation(Sprite):
 		self.mirroring = False
 		self.speed = 0
 		self.currentFrame = frameList[0][0]
+		self.__bitmapDataStartX = bitmapData.x
+		self.__bitmapDataStartY = bitmapData.y
 		self.__speedIndex = 0
 		self.__loopIndex = 0
 		self.__currentDelay = 0
@@ -927,7 +978,7 @@ class Animation(Sprite):
 				self.__currentDelay = currentFrame.delay
 				self.__delayStartTime = time.time()
 
-			self.bitmapData.setProperties(currentFrame.x, currentFrame.y, currentFrame.width, currentFrame.height)
+			self.bitmapData.setProperties(currentFrame.x + self.__bitmapDataStartX, currentFrame.y + self.__bitmapDataStartY, currentFrame.width, currentFrame.height)
 
 			self.dispatchEvent(AnimationEvent.CHANGE_FRAME)
 
@@ -953,12 +1004,12 @@ class Animation(Sprite):
 					self.__playing = False
 					self.__loopIndex = 0
 
-					self.dispatchEvent(AnimationEvent.STOP)
-
 					if rowPlayFlag:
 						self.currentColumn = len(currentRow) - 1
 					else:
 						self.currentRow = len(self.frameList) - 1
+
+					self.dispatchEvent(AnimationEvent.STOP)
 
 	def __loopWithinTimes(self):
 		if self.loopTimes:
@@ -989,6 +1040,12 @@ class Animation(Sprite):
 		self.__currentDelay = 0
 		self.__delayStartTime = None
 
+	def getFrame(self, col, row):
+		if 0 <= row < len(self.frameList) and 0 <= col < len(self.frameList[row]):
+			return self.frameList[row][col]
+
+		return -1
+
 	def divideUniformSizeFrames(width = 0, height = 0, col = 1, row = 1):
 		result = []
 		frameWidth = width / col
@@ -1004,3 +1061,130 @@ class Animation(Sprite):
 			result.append(rowList)
 
 		return result
+
+
+class AnimationSet(Sprite):
+	def __init__(self):
+		super(AnimationSet, self).__init__()
+		
+		self.animationList = {}
+		self.currentAnimation = None
+
+	def addAnimation(self, label, animation, showNow = False):
+		if not (isinstance(label, str) and isinstance(animation, Animation)):
+			raise TypeError("parameter 'label' must be a str object and 'animation' must be an Animation object.")
+
+		if label in self.animationList:
+			raise ValueError("the name of 'label' is repeated.")
+
+		animation.visible = False
+
+		self.animationList[label] = animation
+
+		self.addChild(animation)
+
+		if showNow:
+			self.changeAnimation(label)
+
+	def removeAnimation(self, label):
+		if not isinstance(label, str):
+			raise TypeError("parameter 'label' must be a str object.")
+
+		if label in self.animationList:
+			self.animationList[label].remove()
+
+			self.animationList.pop(label)
+
+	def changeAnimation(self, label, fromCol = None, fromRow = None, isReset = False):
+		for n in self.animationList:
+			o = self.animationList[n]
+
+			if n == label:
+				o.visible = True
+
+				if fromRow is not None:
+					o.currentRow = fromRow
+
+				if fromCol is not None:
+					o.currentColumn = fromCol
+
+				if isReset:
+					o.reset()
+
+				o.play()
+
+				self.currentAnimation = o
+			else:
+				o.visible = False
+
+	def getAnimation(self, label):
+		if label in self.animationList:
+			return self.animationList[label]
+			
+		return -1
+
+
+class SpreadMethod(object):
+	PAD = "pad"
+	REPEAT = "repeat"
+	REFLECT = "reflect"
+
+	def __init__(self):
+		raise Exception("SpreadMethod cannot be instantiated.")
+		
+
+class GradientColor(Object):
+	def __init__(self, alpha = 1):
+		super(GradientColor, self).__init__()
+		
+		self.__alpha = 255 * alpha
+		self.value = None
+		self.spread = SpreadMethod.PAD
+
+	@property
+	def spread(self):
+		return self.__spread
+
+	@spread.setter
+	def spread(self, value):
+		if not isinstance(self.value, QtGui.QGradient):
+			return
+
+		self.__spread = value
+
+		if value == SpreadMethod.PAD:
+			self.value.setSpread(QtGui.QGradient.PadSpread)
+		elif value == SpreadMethod.REPEAT:
+			self.value.setSpread(QtGui.QGradient.RepeatSpread)
+		elif value == SpreadMethod.REFLECT:
+			self.value.setSpread(QtGui.QGradient.ReflectSpread)
+
+	def addColorStop(self, position, colorName):
+		if not isinstance(self.value, QtGui.QGradient) or not position or not colorName:
+			return
+
+		color = getColor(colorName)
+		color.setAlpha(self.__alpha)
+
+		self.value.setColorAt(position, color)
+
+
+class LinearGradientColor(GradientColor):
+	def __init__(self, startX = 0, startY = 0, endX = 0, endY = 0, alpha = 1):
+		super(LinearGradientColor, self).__init__(alpha)
+		
+		self.value = QtGui.QLinearGradient(startX, startY, endX, endY)
+
+
+class RadialGradientColor(GradientColor):
+	def __init__(self, centerX = 0, centerY = 0, radius = 0, alpha = 1):
+		super(RadialGradientColor, self).__init__(alpha)
+		
+		self.value = QtGui.QRadialGradient(centerX, centerY, radius)
+
+
+class ConicalGradientColor(GradientColor):
+	def __init__(self, centerX = 0, centerY = 0, angle = 0, alpha = 1):
+		super(ConicalGradientColor, self).__init__(alpha)
+		
+		self.value = QtGui.QConicalGradient(centerX, centerY, angle)

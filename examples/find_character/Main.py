@@ -11,22 +11,32 @@ from pylash.display import Sprite, Bitmap, BitmapData
 from pylash.text import TextField, TextFormatWeight
 from pylash.system import LoadManage
 from pylash.events import MouseEvent
+from pylash.ui import LoadingSample2
 
 dataList = {}
 beginningLayer = None
 gameLayer = None
+loadingPage = None
 
 def main():
+	global loadingPage
+
 	# save the file path which needs to be loaded
 	loadList = [
 		{"name" : "bg", "path" : "./images/bg.jpg"}
 	]
 
+	# create loading page
+	loadingPage = LoadingSample2()
+	addChild(loadingPage)
+
 	# load file
-	LoadManage.load(loadList, None, gameInit)
+	LoadManage.load(loadList, loadingPage.setProgress, gameInit)
 
 def gameInit(result):
-	global beginningLayer, dataList
+	global beginningLayer, dataList, loadingPage
+
+	loadingPage.remove()
 
 	# save the data which is loaded
 	dataList = result
