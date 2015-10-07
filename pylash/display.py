@@ -502,7 +502,8 @@ class Sprite(DisplayObjectContainer):
 			if self.mouseChildren:
 				for o in self.childList[::-1]:					
 					if (hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(e, currentCd)):
-						break
+						if e["eventType"] != MouseEvent.MOUSE_MOVE.eventType:
+							break
 						
 			self.__dispatchMouseEvent(e, currentCd)
 
