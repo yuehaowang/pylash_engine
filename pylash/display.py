@@ -23,6 +23,7 @@ class DisplayObject(EventDispatcher):
 		self.blendMode = None
 		self.mask = None
 		self._clipPath = None
+		self._mouseIsOn = False
 
 	@property
 	def width(self):
@@ -463,28 +464,39 @@ class Sprite(DisplayObjectContainer):
 				childCd = self.__getVisualCoordinate(cd, o)
 
 				if o._isMouseOn(e, childCd):
+					o._mouseIsOn = True
+
 					e["target"] = o
 
 					return True
+				else:
+					o._mouseIsOn = False
 
 			graphicsCd = self.__getVisualCoordinate(cd, self.graphics)
 
 			if (self.graphics._isMouseOn(e, graphicsCd)):
+				self.graphics._mouseIsOn = True
+
 				e["target"] = self.graphics
 
 				return True
+			else:
+				self.graphics._mouseIsOn = False
 		else:
 			return self.mask._isMouseOn(e, cd)
 
 		return False
 
-	def _enterMouseEvent(self, e, cd):
+	def _enterMouseEvent(self, e, cd, hasBeenOn = False):
 		if not self.visible:
 			return
 
 		currentCd = self.__getVisualCoordinate(cd, self)
 
-		isOn = self._isMouseOn(e, currentCd)
+		isOn = hasBeenOn
+
+		if not hasBeenOn:
+			isOn = self._isMouseOn(e, currentCd)
 
 		if isOn:
 			if self.useHandCursor:
@@ -500,8 +512,8 @@ class Sprite(DisplayObjectContainer):
 				e["eventType"] = MouseEvent.MOUSE_MOVE.eventType
 
 			if self.mouseChildren:
-				for o in self.childList[::-1]:					
-					if (hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(e, currentCd)):
+				for o in self.childList[::-1]:
+					if (hasattr(o, "_enterMouseEvent") and hasattr(o._enterMouseEvent, "__call__") and o._enterMouseEvent(e, currentCd, o._mouseIsOn)):
 						if e["eventType"] != MouseEvent.MOUSE_MOVE.eventType:
 							break
 						
@@ -561,6 +573,61 @@ class Sprite(DisplayObjectContainer):
 
 	def _getOriginalHeight(self):
 		return self.endY() - self.startY()
+
+
+class Shape(DisplayObject):
+	def __init__(self):
+		super(Shape, self).__init__()
+		
+		self.graphics = Graphics()
+		self.graphics.parent = self
+		self._clipPath = self.graphics._clipPath
+
+	def _loopDraw(self, c):
+		self.graphics._show(c)
+
+	def startX(self):
+		return self.x + self.graphics.startX()
+
+	def startY(self):
+		return self.y + self.graphics.startY()
+
+	def endX(self):
+		return self.x + self.graphics.endX()
+
+	def endY(self):
+		return self.y + self.graphics.endY()
+
+	def _getOriginalWidth(self):
+		return self.endX() - self.startX()
+
+	def _getOriginalHeight(self):
+		return self.endY() - self.startY()
+
+	def _isMouseOn(self, e, cd):
+		if not self.visible:
+			return
+		
+		if not self._hasMask():
+			graphicsCd = {
+				"x" : cd["x"] + self.graphics.x * cd["scaleX"],
+				"y" : cd["y"] + self.graphics.y * cd["scaleY"],
+				"scaleX" : cd["scaleX"] * self.graphics.scaleX,
+				"scaleY" : cd["scaleY"] * self.graphics.scaleY
+			}
+
+			if (self.graphics._isMouseOn(e, graphicsCd)):
+				self.graphics._mouseIsOn = True
+
+				e["target"] = self.graphics
+
+				return True
+			else:
+				self.graphics._mouseIsOn = False
+		else:
+			return self.mask._isMouseOn(e, cd)
+
+		return False
 
 
 class JoinStyle(Object):
