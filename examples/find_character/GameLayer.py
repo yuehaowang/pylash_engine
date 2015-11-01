@@ -1,10 +1,11 @@
 import sys
 import random
+import math
 from TimeBar import TimeBar
 
 sys.path.insert(0, "../../")
 from pylash.utils import stage
-from pylash.display import Sprite, Bitmap, BitmapData
+from pylash.display import Sprite, Bitmap, BitmapData, Shape
 from pylash.text import TextField, TextFormatWeight, TextFormatAlign
 from pylash.events import MouseEvent
 
@@ -34,22 +35,30 @@ class GameLayer(Sprite):
 		targetY = random.randint(0, 9)
 
 		self.blockLayer = Sprite()
+		self.blockLayer.name = "xxx"
 		self.blockLayer.x = 50
 		self.blockLayer.y = 50
 		self.blockLayer.alpha = 0.7
+		self.blockLayer.mouseChildren = False
 		self.addChild(self.blockLayer)
+
+		shapeLayer = Sprite()
+		self.blockLayer.addChild(shapeLayer)
+
+		txtLayer = Sprite()
+		self.blockLayer.addChild(txtLayer)
 
 		# create blocks with a character
 		for i in range(10):
 			for j in range(10):
-				block = Sprite()
+				block = Shape()
 				block.x = j * 50
 				block.y = i * 50
 				block.graphics.beginFill("#33CCFF")
 				block.graphics.lineStyle(5, "#0066FF")
 				block.graphics.drawRect(0, 0, 50, 50)
 				block.graphics.endFill()
-				self.blockLayer.addChild(block)
+				shapeLayer.addChild(block)
 
 				txt = TextField()
 				txt.size = 20
@@ -66,16 +75,21 @@ class GameLayer(Sprite):
 
 					block.isTarget = False
 
-				txt.x = (50 - txt.width) / 2
-				txt.y = (50 - txt.height) / 2
-				block.addChild(txt)
+				txt.x = block.x + (50 - txt.width) / 2
+				txt.y = block.y + (50 - txt.height) / 2
+				txtLayer.addChild(txt)
 
-				block.addEventListener(MouseEvent.MOUSE_UP, self.check)
+		self.blockLayer.addEventListener(MouseEvent.MOUSE_UP, self.check)
 
 	def check(self, e):
 		global gameOver
 
-		b = e.currentTarget
+		clickX = math.floor(e.selfX / 50)
+		clickY = math.floor(e.selfY / 50)
+
+		shapeLayer = self.blockLayer.getChildAt(0);
+
+		b = shapeLayer.getChildAt(clickY * 10 + clickX)
 
 		if b.isTarget:
 			self.gameOver("win")
