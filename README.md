@@ -87,7 +87,7 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 *Release Date: 9/12/2015*
 
-Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules where `Sprite`, `Bitmap`, `Graphics`, `Loader`, `Stage` and more powerful classes are.
+Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules which include `Sprite`, `Bitmap`, `Graphics`, `Loader`, `Stage` and more powerful classes.
 
 
 ## Get Started
