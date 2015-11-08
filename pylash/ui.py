@@ -1,17 +1,20 @@
-from .utils import Object, stage
+from .utils import Object, stage, removeItemsInList
 from .display import Sprite, DisplayObject, RadialGradientColor, Graphics
 from .text import TextField, TextFormatWeight
 from .events import MouseEvent
 
 
-class ButtonState(Object):
+__author__ = "Yuehao Wang"
+
+
+class ButtonState(object):
 	ENABLED = "enabled_state"
 	NORMAL = "normal_state"
 	OVER = "over_state"
 	DOWN = "down_state"
 	DISABLED = "disabled_state"
 
-	def __init__(self):
+	def __init__():
 		raise Exception("ButtonState cannot be instantiated.")
 
 

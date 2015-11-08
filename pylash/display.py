@@ -1,6 +1,6 @@
 import time
 from PyQt4 import QtGui, QtCore
-from .utils import Object, stage, getColor, Stage, removeItemsInList
+from .utils import Object, stage, getColor, Stage
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
 
 
@@ -136,7 +136,7 @@ class DisplayObject(EventDispatcher):
 			self.parent.removeChild(self)
 
 
-class BlendMode(Object):
+class BlendMode(object):
 	SOURCE_OVER = "source-over"
 	SOURCE_ATOP = "source-atop"
 	SOURCE_IN = "source-in"
@@ -151,7 +151,7 @@ class BlendMode(Object):
 	NONE = None
 	NORMAL = None
 
-	def __init__(self,):
+	def __init__():
 		raise Exception("BlendMode cannot be instantiated.")
 
 
@@ -334,7 +334,7 @@ class DisplayObjectContainer(InteractiveObject):
 			elif isinstance(index, int) and index < len(childList):
 				childList.insert(index, child)
 		else:
-			raise TypeError("parameter 'child' must be a display object.")
+			raise TypeError("DisplayObjectContainer.addChild(child): parameter 'child' must be a display object.")
 
 	def addChildAt(self, child, index):
 		self.addChild(child, index)
@@ -346,7 +346,7 @@ class DisplayObjectContainer(InteractiveObject):
 		childList = self.childList
 
 		if not isinstance(child, DisplayObject):
-			raise TypeError("parameter 'child' must be a display object.")
+			raise TypeError("DisplayObjectContainer.removeChild(child): parameter 'child' must be a display object.")
 
 		childList.remove(child)
 
@@ -630,21 +630,21 @@ class Shape(DisplayObject):
 		return False
 
 
-class JoinStyle(Object):
+class JoinStyle(object):
 	MITER = "miter"
 	ROUND = "round"
 	BEVEL = "bevel"
 
-	def __init__(self):
+	def __init__():
 		raise Exception("JoinStyle cannot be instantiated.")
 
 
-class CapsStyle(Object):
+class CapsStyle(object):
 	NONE = "none"
 	SQUARE = "square"
 	ROUND = "round"
 
-	def __init__(self):
+	def __init__():
 		raise Exception("CapsStyle cannot be instantiated.")
 
 
@@ -689,10 +689,11 @@ class Graphics(DisplayObject):
 			if lineColor:
 				color = getColor(lineColor)
 
-				if lineAlpha:
-					color.setAlpha(lineAlpha)
+				if isinstance(color, QtGui.QColor):
+					if lineAlpha:
+						color.setAlpha(lineAlpha)
 
-				pen.setColor(color)
+					pen.setColor(color)
 			else:
 				pen.setColor(getColor("transparent"))
 
@@ -960,11 +961,11 @@ class AnimationFrame(Object):
 		self.delay = 0
 
 
-class AnimationPlayMode(Object):
+class AnimationPlayMode(object):
 	HORIZONTAL = "horizontal"
 	VERTICAL = "vertical"
 
-	def __init__(self):
+	def __init__():
 		raise Exception("AnimationPlayMode cannot be instantiated.")
 
 
@@ -1140,10 +1141,10 @@ class AnimationSet(Sprite):
 
 	def addAnimation(self, label, animation, showNow = False):
 		if not (isinstance(label, str) and isinstance(animation, Animation)):
-			raise TypeError("parameter 'label' must be a str object and 'animation' must be an Animation object.")
+			raise TypeError("AnimationSet.addAnimation(label, animation, showNow = False): parameter 'label' must be a str object and 'animation' must be an Animation object.")
 
 		if label in self.animationList:
-			raise ValueError("the name of 'label' is repeated.")
+			raise ValueError("AnimationSet.addAnimation(label, animation, showNow = False): the name of 'label' is repeated.")
 
 		animation.visible = False
 
@@ -1156,7 +1157,7 @@ class AnimationSet(Sprite):
 
 	def removeAnimation(self, label):
 		if not isinstance(label, str):
-			raise TypeError("parameter 'label' must be a str object.")
+			raise TypeError("AnimationSet.removeAnimation(label): parameter 'label' must be a str object.")
 
 		if label in self.animationList:
 			self.animationList[label].remove()
@@ -1197,9 +1198,9 @@ class SpreadMethod(object):
 	REPEAT = "repeat"
 	REFLECT = "reflect"
 
-	def __init__(self):
+	def __init__():
 		raise Exception("SpreadMethod cannot be instantiated.")
-		
+
 
 class GradientColor(Object):
 	def __init__(self, alpha = 1):

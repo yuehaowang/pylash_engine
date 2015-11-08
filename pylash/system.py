@@ -1,8 +1,7 @@
-import threading
+import threading, time
 from .utils import Object, stage
 from .display import Loader
 from .events import Event
-import time
 
 
 __author__ = "Yuehao Wang"
