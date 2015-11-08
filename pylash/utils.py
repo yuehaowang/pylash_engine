@@ -152,7 +152,7 @@ class Stage(Object):
 			
 			self.childList.append(child)
 		else:
-			raise TypeError("parameter 'child' must be a display object.")
+			raise TypeError("Stage.addChild(child): parameter 'child' must be a display object.")
 
 	def removeChild(self, child):
 		if child is not None:
@@ -160,7 +160,7 @@ class Stage(Object):
 			
 			child.parent = None
 		else:
-			raise TypeError("parameter 'child' must be a display object.")
+			raise TypeError("Stage.removeChild(child): parameter 'child' must be a display object.")
 
 	def addEventListener(self, e, listener):
 		if hasattr(e, "eventType"):
@@ -192,13 +192,42 @@ for o in dir(QtCore.Qt):
 		setattr(KeyCode, propertyName, value)
 
 
+class UnityOfDictAndClass(Object):
+	def __init__(self):
+		super(UnityOfDictAndClass, self).__init__()
+	
+	def set(obj, key, value):
+		if isinstance(obj, dict):
+			obj[key] = value
+		else:
+			setattr(obj, key, value)
+
+	def get(obj, key):
+		value = None
+
+		if isinstance(obj, dict):
+			if key in obj:
+				value = obj[key]
+		else:
+			if hasattr(obj, key):
+				value = getattr(obj, key)
+
+		return value
+
+	def has(obj, key):
+		if isinstance(obj, dict):
+			return (key in obj)
+		else:
+			return hasattr(obj, key)
+
+
 def init(speed, title, width, height, callback):
 	stage.app = QtGui.QApplication(sys.argv)
 
 	stage._setCanvas(speed, title, width, height)
 
 	if not hasattr(callback, "__call__"):
-		raise TypeError("parameter 'callback' must be a function.")
+		raise TypeError("init(speed, title, width, height, callback): parameter 'callback' must be a function.")
 
 	callback()
 

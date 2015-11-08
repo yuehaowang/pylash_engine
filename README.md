@@ -5,6 +5,12 @@
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
+
+## License: MIT License
+
+We use [MIT License](http://en.wikipedia.org/wiki/MIT_License), which is a free and friendly license. Besides, you must follow the license of `PyQt4` as well, because `pylash` is based on it.
+
+
 ## Get Pylash
 
 **With Git:**
@@ -35,6 +41,17 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 [https://riverbankcomputing.com/software/pyqt/intro](https://riverbankcomputing.com/software/pyqt/intro)
 
 
+## Support
+
+If you find the library has some bugs or that you have any questions or advice, please let me know:
+
+> **My email:** wangyuehao1999@gmail.com
+> 
+> **My twitter:** [twitter.com/yuehaowang](twitter.com/yuehaowang)
+
+Bugs can be submited into [Github Issues](https://github.com/yuehaowang/pylash_engine/issues) too.
+
+
 ## Demo Screenshots
 
 - **Find Character**
@@ -50,7 +67,30 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 ![Demo 2](http://wyh.wjjsoft.com/album/pylash_demo3.png)
 
 
+## Get Started
+
+- [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
+- [A Simple Program: Hello World](https://github.com/yuehaowang/pylash_engine/wiki/A-Simple-Program:-Hello-World)
+- [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
+- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
+
+
+## Documentation
+
+Documentation comes soon...
+
+
 ## Changelog
+
+### version 1.3.0
+
+*Release Date: 11/8/2015*
+
+1. Bugfix: some errors will be thrown when you give a `LinearGradientColor`/`RadialGradientColor`/`ConicalGradientColor` object to `lineStyle` method of `Graphics` class as the second parameter.
+2. Added `TweenLite` static class and `TweenLiteChild` class to create some easing animations.
+3. Added `Easing` static class to provide many easing methods for `TweenLite` class.
+4. Improvement: more detailed internal error hints.
+5. Bugfix: cannot use `Button.removeState`.
 
 #### version 1.2.1
 
@@ -88,15 +128,3 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 *Release Date: 9/12/2015*
 
 Create `pylash` with `display`, `text`, `system`, `utils` and `events` modules which include `Sprite`, `Bitmap`, `Graphics`, `Loader`, `Stage` and more powerful classes.
-
-
-## Get Started
-
-- [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
-- [A Simple Program: Hello World](https://github.com/yuehaowang/pylash_engine/wiki/A-Simple-Program:-Hello-World)
-- [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
-- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
-
-## Documentation
-
-Documentation comes soon...

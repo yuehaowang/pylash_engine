@@ -16,7 +16,7 @@ class Event(Object):
 		self.target = None
 
 
-class MouseEvent(Event):
+class MouseEvent(object):
 	MOUSE_DOWN = Event("mouse_down")
 	MOUSE_UP = Event("mouse_up")
 	MOUSE_MOVE = Event("mouse_move")
@@ -28,7 +28,7 @@ class MouseEvent(Event):
 		raise Exception("MouseEvent cannot be instantiated.")
 
 
-class KeyboardEvent(Event):
+class KeyboardEvent(object):
 	KEY_DOWN = Event("key_down")
 	KEY_UP = Event("key_up")
 
@@ -36,7 +36,7 @@ class KeyboardEvent(Event):
 		raise Exception("KeyboardEvent cannot be instantiated.")
 
 
-class AnimationEvent(Event):
+class AnimationEvent(object):
 	CHANGE_FRAME = Event("animation_change_frame")
 	STOP = Event("animation_stop")
 	START = Event("animation_start")
