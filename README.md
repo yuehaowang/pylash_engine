@@ -82,6 +82,18 @@ Documentation comes soon...
 
 ## Changelog
 
+### version 1.3.1
+
+*Release Date: 11/21/2015*
+
+1. Added `draw` method in `BitmapData` to draw a display object in `BitmapData` object.
+2. Improvement: change drawing `QImage` object into drawing `QPixmap` object to make image rendering fast.
+3. Added `setPixel`, `getPixel`, `setPixels`, `getPixels` method in `BitmapData` for pixel processing.
+4. Added `lock`, `unlock` method in `BitmapData` for faster pixel processing when you process pixels many times at a time.
+5. Added `Rectangle` class and `Point` class.
+6. Bugfix: get wrong width/height of `Graphics` when using `moveTo` method or `lineTo` method.
+7. Enhancement: support hex value when setting color.
+
 ### version 1.3.0
 
 *Release Date: 11/8/2015*
