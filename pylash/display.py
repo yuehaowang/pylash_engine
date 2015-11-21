@@ -1,4 +1,4 @@
-import time
+import time, math
 from PyQt4 import QtGui, QtCore
 from .utils import Object, stage, getColor, Stage
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
@@ -181,11 +181,19 @@ class BitmapData(Object):
 	def __init__(self, image = QtGui.QImage(), x = 0, y = 0, width = 0, height = 0):
 		super(BitmapData, self).__init__()
 
+		if isinstance(image, QtGui.QImage):
+			if stage.app:
+				image = QtGui.QPixmap(image)
+		elif not isinstance(image, QtGui.QPixmap):
+			raise TypeError("BitmapData(image = QtGui.QImage(), x = 0, y = 0, width = 0, height = 0): parameter 'image' must be a QPixmap or QImage object.")
+
 		self.image = image
 		self.x = x
 		self.y = y
 		self.width = width
 		self.height = height
+		self.__locked = False
+		self.__pixelData = []
 
 		if image is not None:
 			if width == 0:
@@ -248,6 +256,167 @@ class BitmapData(Object):
 		self.width = width
 		self.height = height
 
+	def draw(self, source):
+		if not isinstance(source, DisplayObject):
+			raise TypeError("BitmapData.draw(source): parameter 'source' must be a display object.")
+
+		w = source.endX()
+		h = source.endY()
+
+		self.image = QtGui.QPixmap(w, h)
+		self.image.fill(QtCore.Qt.transparent)
+		
+		p = QtGui.QPainter()
+		p.begin(self.image)
+
+		if stage.useAntialiasing:
+			p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+		else:
+			p.setRenderHint(QtGui.QPainter.Antialiasing, False)
+
+		source._show(p)
+
+		p.end()
+
+		self.width = w
+		self.height = h
+
+	def __getPixelData(self):
+		if isinstance(self.image, QtGui.QPixmap):
+			self.image = self.image.toImage()
+
+		for i in range(self.height):
+			for j in range(self.width):
+				self.__pixelData.append(self.image.pixel(j, i))
+
+	def __updatePixelData(self):
+		x = 0
+		y = 0
+
+		for i in range(len(self.__pixelData)):
+			v = self.__pixelData[i]
+
+			self.image.setPixel(x, y, v)
+
+			x += 1
+
+			if x >= self.width:
+				x = 0
+				y += 1
+
+		self.image = QtGui.QPixmap(self.image)
+
+		self.__pixelData = []
+
+	def lock(self):
+		if self.__locked:
+			return
+
+		self.__locked = True
+
+		self.__getPixelData()
+
+	def unlock(self):
+		if not self.__locked:
+			return
+
+		self.__locked = False
+
+		self.__updatePixelData()
+
+	def getPixel(self, x, y):
+		if not self.__locked:
+			self.__getPixelData()
+
+		i = math.floor(y * self.width + x)
+
+		if i < 0 or i >= len(self.__pixelData):
+			raise ValueError("BitmapData.getPixel(x, y): the point (x, y) is not in the image.")
+
+		if not self.__locked:
+			self.__updatePixelData()
+
+		return self.__pixelData[i]
+
+	def setPixel(self, x, y, color):
+		if not self.__locked:
+			self.__getPixelData()
+
+		i = math.floor(y * self.width + x)
+
+		if i < 0 or i >= len(self.__pixelData):
+			raise ValueError("BitmapData.setPixel(x, y, color): the point (x, y) is not in the image.")
+
+		if isinstance(color, int):
+			color = str(color)
+
+		self.__pixelData[i] = int(color, 16)
+
+		if not self.__locked:
+			self.__updatePixelData()
+
+	def getPixels(self, rect):
+		if not self.__locked:
+			self.__getPixelData()
+
+		result = []
+
+		left = math.floor(rect.left)
+		right = math.floor(rect.right)
+		top = math.floor(rect.top)
+		bottom = math.floor(rect.bottom)
+
+		for y in range(top, bottom):
+			for x in range(left, right):
+				i = math.floor(y * self.width + x)
+
+				if i < 0 or i >= len(self.__pixelData):
+					raise ValueError("BitmapData.getPixels(rect): parameter 'rect' is not in the image.")
+
+				result.append(self.__pixelData[i])
+
+		if not self.__locked:
+			self.__updatePixelData()
+
+		return result
+
+	def setPixels(self, rect, pixel):
+		if not self.__locked:
+			self.__getPixelData()
+
+		pixelType = 0
+
+		if isinstance(pixel, int):
+			pixel = str(pixel)
+		elif isinstance(pixel, list):
+			if len(pixel) < rect.width * rect.height:
+				raise TypeError("BitmapData.setPixels(rect, pixel): parameter 'pixel' doesn't have enough pixel data.")
+
+			pixelType = 1
+		elif not isinstance(pixel, str):
+			raise TypeError("BitmapData.setPixels(rect, pixel): parameter 'pixel' must be str, int or list object.")
+
+		left = math.floor(rect.left)
+		right = math.floor(rect.right)
+		top = math.floor(rect.top)
+		bottom = math.floor(rect.bottom)
+
+		for y in range(top, bottom):
+			for x in range(left, right):
+				i = math.floor(y * self.width + x)
+
+				if i < 0 or i >= len(self.__pixelData):
+					raise ValueError("BitmapData.setPixels(rect, pixel): parameter 'rect' is not in the image.")
+
+				if pixelType == 0:
+					self.__pixelData[i] = int(pixel, 16)
+				else:
+					j = math.floor((y - top) * rect.width + x - left)
+					self.__pixelData[i] = pixel[j]
+
+		if not self.__locked:
+			self.__updatePixelData()
+		
 
 class Bitmap(DisplayObject):
 	def __init__(self, bitmapData = BitmapData()):
@@ -263,8 +432,12 @@ class Bitmap(DisplayObject):
 
 	def _loopDraw(self, c):
 		bmpd = self.bitmapData
+		image = bmpd.image
 
-		c.drawImage(0, 0, bmpd.image, bmpd.x, bmpd.y, bmpd.width, bmpd.height)
+		if isinstance(image, QtGui.QPixmap):
+			c.drawPixmap(0, 0, image, bmpd.x, bmpd.y, bmpd.width, bmpd.height)
+		elif isinstance(image, QtGui.QImage):
+			c.drawImage(0, 0, image, bmpd.x, bmpd.y, bmpd.width, bmpd.height)
 
 
 class InteractiveObject(DisplayObject):
@@ -796,6 +969,7 @@ class Graphics(DisplayObject):
 		self.__currentGraphics["path"].moveTo(x, y)
 
 		self._clipPath.moveTo(x, y)
+		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x, "endY" : y})
 
 	def lineTo(self, x, y):
 		if not self.__currentGraphics:
@@ -804,6 +978,7 @@ class Graphics(DisplayObject):
 		self.__currentGraphics["path"].lineTo(x, y)
 
 		self._clipPath.lineTo(x, y)
+		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x, "endY" : y})
 
 	def drawRect(self, x, y, width, height):
 		if not self.__currentGraphics:

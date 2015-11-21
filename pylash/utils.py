@@ -250,6 +250,12 @@ def getColor(color):
 	elif not color:
 		return QtCore.Qt.transparent
 	else:
+		if isinstance(color, int):
+			color = str(color)
+			
+		if color[0 : 4].lower() == "0xff":
+			color = "#" + color[4 ::]
+
 		colorObj = QtGui.QColor()
 		colorObj.setNamedColor(color)
 
