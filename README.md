@@ -1,7 +1,7 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.3.1**
+**Latest Version: 1.3.2**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -56,15 +56,15 @@ Bugs can be submited into [Github Issues](https://github.com/yuehaowang/pylash_e
 
 - **Find Character**
 
-![Demo 1](http://wyh.wjjsoft.com/album/pylash_demo1.png)
+![Demo 1](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo1.png)
 
 - **Get Fruits**
 
-![Demo 2](http://wyh.wjjsoft.com/album/pylash_demo2.png)
+![Demo 2](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo2.png)
 
 - **Tower Defense**
 
-![Demo 2](http://wyh.wjjsoft.com/album/pylash_demo3.png)
+![Demo 3](http://images.cnblogs.com/cnblogs_com/yorhom/731449/o_pylash_demo3.png)
 
 
 ## Get Started
@@ -73,6 +73,7 @@ Bugs can be submited into [Github Issues](https://github.com/yuehaowang/pylash_e
 - [A Simple Program: Hello World](https://github.com/yuehaowang/pylash_engine/wiki/A-Simple-Program:-Hello-World)
 - [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
 - [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
+- [Create Vector Graphics](https://github.com/yuehaowang/pylash_engine/wiki/Create-Vector-Graphics)
 
 
 ## Documentation
@@ -81,6 +82,13 @@ Documentation comes soon...
 
 
 ## Changelog
+
+### version 1.3.2
+
+*Release Date: 12/26/2015*
+
+1. Added `ButtonSample` in `ui` module, which is used for creating a very simple button. Generally speaking, it's used for testing.
+2. Added `StageWebView` in `media` module to show some webpages in the window.
 
 ### version 1.3.1
 

@@ -1,5 +1,5 @@
 from .utils import Object, stage, removeItemsInList
-from .display import Sprite, DisplayObject, RadialGradientColor, Graphics
+from .display import Sprite, DisplayObject, RadialGradientColor, LinearGradientColor, Graphics
 from .text import TextField, TextFormatWeight
 from .events import MouseEvent
 
@@ -438,3 +438,69 @@ class LoadingSample3(LoadingSample):
 		self.__contentLayer.graphics.beginFill(self.progressColor)
 		self.__contentLayer.graphics.drawRoundRect(3, 3, totalWidth * ratio - 6, self.progressBarHeight - 6, 10, 7)
 		self.__contentLayer.graphics.endFill()
+
+
+class ButtonSample(Button):
+	def __init__(self, **kw):
+		roundBorder = True
+		backgroundColor = {"normalState" : "#DDDDDD", "overState" : "#E3E3E3"}
+		lineColor = "#CCCCCC"
+
+		if "roundBorder" in kw:
+			roundBorder = kw["roundBorder"]
+
+		if "backgroundColor" in kw:
+			backgroundColor = kw["backgroundColor"]
+
+			if not "normalState" in backgroundColor:
+				backgroundColor["normalState"] = "#DDDDDD"
+
+			if not "overState" in backgroundColor:
+				backgroundColor["overState"] = "#E3E3E3"
+
+		if "lineColor" in kw:
+			lineColor = kw["lineColor"]
+
+		txt = TextField()
+
+		if "text" in kw:
+			txt.text = kw["text"]
+
+		if "textColor" in kw:
+			txt.textColor = kw["textColor"]
+
+		if "font" in kw:
+			txt.font = kw["font"]
+
+		if "size" in kw:
+			txt.size = kw["size"]
+
+		if "weight" in kw:
+			txt.weight = kw["weight"]
+
+		btnWidth = txt.width * 1.2
+		btnHeight = txt.height * 1.2
+
+		normalState = Sprite()
+		normalState.graphics.beginFill(backgroundColor["normalState"])
+		normalState.graphics.lineStyle(2, lineColor)
+		if roundBorder:
+			normalState.graphics.drawRoundRect(0, 0, btnWidth, btnHeight, 5)
+		else:
+			normalState.graphics.drawRect(0, 0, btnWidth, btnHeight)
+		normalState.graphics.endFill()
+
+		overState = Sprite()
+		overState.graphics.beginFill(backgroundColor["overState"])
+		overState.graphics.lineStyle(2, lineColor)
+		if roundBorder:
+			overState.graphics.drawRoundRect(0, 0, btnWidth, btnHeight, 5)
+		else:
+			overState.graphics.drawRect(0, 0, btnWidth, btnHeight)
+		overState.graphics.endFill()
+
+		super(ButtonSample, self).__init__(normalState, overState)
+
+		txt.x = txt.width * 0.1
+		txt.y = txt.height * 0.1
+		self.addChild(txt)
