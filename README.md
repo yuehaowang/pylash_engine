@@ -87,10 +87,10 @@ Documentation comes soon...
 
 *Release Date: 1/10/2015*
 
-1. Added `LineEdit` in `ui` module to add single-line input box.
+1. Added `LineEdit` class in `ui` module to add single-line input box.
 2. Added `RankingSystem` in `system` module, which connect server and send requests to add/get ranking.
 3. Added `RankingServer` in `net` module, which is a `socket` server used with `RankingSystem`.
-4. Bugfix: cannot use `onComplete`&`onStart`&`onUpdate` property in TweenLite.
+4. Bugfix: cannot use `onComplete`&`onStart`&`onUpdate` property in `TweenLite`.
 
 ### version 1.3.2
 
