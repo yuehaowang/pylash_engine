@@ -2,6 +2,7 @@ import time, math
 from PyQt4 import QtGui, QtCore
 from .utils import Object, stage, getColor, Stage
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
+from .geom import Point
 
 
 __author__ = "Yuehao Wang"
@@ -24,14 +25,34 @@ class DisplayObject(EventDispatcher):
 		self.mask = None
 		self._clipPath = None
 		self._mouseIsOn = False
+		self.__setWidthScale = 1
+		self.__setHeightScale = 1
 
 	@property
 	def width(self):
-		return self._getOriginalWidth() * abs(self.scaleX)
+		return self._getOriginalWidth() * abs(self.scaleX) * abs(self.__setWidthScale)
+
+	@width.setter
+	def width(self, w):
+		ow = self._getOriginalWidth()
+
+		if ow == 0:
+			return
+
+		self.__setWidthScale = w / self._getOriginalWidth()
 
 	@property
 	def height(self):
-		return self._getOriginalHeight() * abs(self.scaleY)
+		return self._getOriginalHeight() * abs(self.scaleY) * abs(self.__setHeightScale)
+
+	@height.setter
+	def height(self, h):
+		oh = self._getOriginalHeight()
+
+		if oh == 0:
+			return
+
+		self.__setHeightScale = h / self._getOriginalHeight()
 
 	def __getCompositionMode(self):
 		v = self.blendMode
@@ -70,7 +91,7 @@ class DisplayObject(EventDispatcher):
 		c.translate(self.x, self.y)
 		c.setOpacity(self.alpha * c.opacity())
 		c.rotate(self.rotation)
-		c.scale(self.scaleX, self.scaleY)
+		c.scale(self.scaleX * self.__setWidthScale, self.scaleY * self.__setHeightScale)
 		c.setCompositionMode(self.__getCompositionMode())
 
 		if self._hasMask():
@@ -134,6 +155,21 @@ class DisplayObject(EventDispatcher):
 	def remove(self):
 		if hasattr(self, "parent") and (isinstance(self.parent, DisplayObjectContainer) or isinstance(self.parent, Stage)):
 			self.parent.removeChild(self)
+
+	def getRootCoordinate(self):
+		r = Point(self.x, self.y)
+		p = self.parent
+
+		while isinstance(p, DisplayObjectContainer):
+			r.x += p.x
+			r.y += p.y
+
+			p = p.parent
+
+		return r
+
+	def die(self):
+		self.parent = None
 
 
 class BlendMode(object):
@@ -513,6 +549,9 @@ class DisplayObjectContainer(InteractiveObject):
 		self.addChild(child, index)
 
 	def removeAllChildren(self):
+		for c in self.childList:
+			c.die()
+
 		self.childList = []
 
 	def removeChild(self, child):
@@ -522,8 +561,8 @@ class DisplayObjectContainer(InteractiveObject):
 			raise TypeError("DisplayObjectContainer.removeChild(child): parameter 'child' must be a display object.")
 
 		childList.remove(child)
-
-		child.parent = None
+		
+		child.die()
 
 	def removeChildAt(self, index):
 		childList = self.childList
@@ -532,7 +571,7 @@ class DisplayObjectContainer(InteractiveObject):
 			child = childList[index]
 
 			if isinstance(child, DisplayObject):
-				child.parent = None
+				child.die()
 
 			childList.pop(index)
 

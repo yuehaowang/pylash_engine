@@ -1,7 +1,7 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.3.2**
+**Latest Version: 1.3.3**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -82,6 +82,15 @@ Documentation comes soon...
 
 
 ## Changelog
+
+### version 1.3.3
+
+*Release Date: 1/10/2015*
+
+1. Added `LineEdit` in `ui` module to add single-line input box.
+2. Added `RankingSystem` in `system` module, which connect server and send requests to add/get ranking.
+3. Added `RankingServer` in `net` module, which is a `socket` server used with `RankingSystem`.
+4. Bugfix: cannot use `onComplete`&`onStart`&`onUpdate` property in TweenLite.
 
 ### version 1.3.2
 

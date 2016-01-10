@@ -19,6 +19,7 @@ class CanvasWidget(QtGui.QWidget):
 		super(CanvasWidget, self).__init__()
 
 		self.setMouseTracking(True)
+		self.setFocusPolicy(QtCore.Qt.ClickFocus)
 
 	def paintEvent(self, event):
 		stage._onShow()
@@ -158,7 +159,7 @@ class Stage(Object):
 		if child is not None:
 			self.childList.remove(child)
 			
-			child.parent = None
+			child.die()
 		else:
 			raise TypeError("Stage.removeChild(child): parameter 'child' must be a display object.")
 

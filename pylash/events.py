@@ -44,6 +44,14 @@ class AnimationEvent(object):
 	def __init__():
 		raise Exception("AnimationEvent cannot be instantiated.")
 
+class RankingSystemEvent(object):
+	SUCCEED_IN_ADDING_RECORD = Event("ranking_system_succeed_in_adding_record")
+	FAIL_TO_ADD_RECORD = Event("ranking_system_fail_to_add_record")
+	FAIL_TO_GET_RECORDS = Event("ranking_system_fail_to_get_records")
+	SUCCEED_IN_GETTING_RECORDS = Event("ranking_system_succeed_in_getting_records")
+
+	def __init__(self):
+		raise Exception("RankingSystemEvent cannot be instantiated.")
 
 class EventDispatcher(Object):
 	def __init__(self):

@@ -1,7 +1,8 @@
-from .utils import Object, stage, removeItemsInList
+from PyQt4 import QtGui
+from .utils import Object, stage, removeItemsInList, getColor
 from .display import Sprite, DisplayObject, RadialGradientColor, LinearGradientColor, Graphics
 from .text import TextField, TextFormatWeight
-from .events import MouseEvent
+from .events import MouseEvent, EventDispatcher, Event
 
 
 __author__ = "Yuehao Wang"
@@ -504,3 +505,168 @@ class ButtonSample(Button):
 		txt.x = txt.width * 0.1
 		txt.y = txt.height * 0.1
 		self.addChild(txt)
+
+
+class LineEdit(Sprite):
+	def __init__(self, backgroundLayer = None):
+		super(LineEdit, self).__init__()
+		
+		self.__font = "Arial"
+		self.__size = 15
+		self.__italic = False
+		self.__weight = TextFormatWeight.NORMAL
+		self.__preWidth = self.width
+		self.__preHeight = self.height
+		self.__preX = self.x
+		self.__preY = self.y
+		self.__preVisible = not self.visible
+		self.__textColor = "black"
+		self.__widgetFont = QtGui.QFont()
+		self.__widgetPalette = QtGui.QPalette()
+		self.lineEditWidget = QtGui.QLineEdit(stage.canvasWidget)
+		self.backgroundLayer = backgroundLayer
+
+		if not isinstance(self.backgroundLayer, DisplayObject):
+			self.backgroundLayer = Sprite()
+			self.backgroundLayer.graphics.beginFill("white")
+			self.backgroundLayer.graphics.lineStyle(2, "gray")
+			self.backgroundLayer.graphics.drawRect(0, 0, 200, 40)
+			self.backgroundLayer.graphics.endFill()
+
+		self.addChild(self.backgroundLayer)
+
+		self.__initWidget()
+
+		self.addEventListener(Event.ENTER_FRAME, self.__loop)
+
+	@property
+	def text(self):
+		return self.lineEditWidget.text()
+
+	@text.setter
+	def text(self, v):
+		self.lineEditWidget.setText(v)
+
+	@property
+	def textColor(self):
+		return self.__textColor
+
+	@textColor.setter
+	def textColor(self, v):
+		self.__textColor = v
+
+		self.__widgetPalette.setColor(QtGui.QPalette.Text, getColor(v))
+		self.lineEditWidget.setPalette(self.__widgetPalette)
+
+	@property
+	def font(self):
+		return self.__font
+
+	@font.setter
+	def font(self, v):
+		self.__font = v
+
+		self.__widgetFont.setFamily(v)
+		self.lineEditWidget.setFont(self.__widgetFont)
+
+	@property
+	def size(self):
+		return self.__size
+
+	@size.setter
+	def size(self, v):
+		self.__size = v
+
+		self.__widgetFont.setPixelSize(v)
+		self.lineEditWidget.setFont(self.__widgetFont)
+
+	@property
+	def weight(self):
+		return self.__weight
+
+	@weight.setter
+	def weight(self, v):
+		self.__weight = v
+
+		self.__widgetFont.setWeight(self.__getFontWeight(v))
+		self.lineEditWidget.setFont(self.__widgetFont)
+
+	@property
+	def italic(self):
+		return self.__italic
+
+	@italic.setter
+	def italic(self, v):
+		self.__italic = v
+
+		self.__widgetFont.setItalic(v)
+		self.lineEditWidget.setFont(self.__widgetFont)
+
+	def __initWidget(self):
+		self.__widgetPalette.setColor(QtGui.QPalette.Base, getColor("transparent"))
+		self.__widgetPalette.setColor(QtGui.QPalette.Text, getColor(self.textColor))
+		self.lineEditWidget.setPalette(self.__widgetPalette)
+
+		self.__widgetFont.setFamily(self.font)
+		self.__widgetFont.setPixelSize(self.size)
+		self.__widgetFont.setWeight(self.__getFontWeight(self.weight))
+		self.__widgetFont.setItalic(self.italic)
+		self.lineEditWidget.setFont(self.__widgetFont)
+
+		self.lineEditWidget.setFrame(False)
+
+		self.lineEditWidget.resize(self.width, self.height)
+		
+		pos = self.getRootCoordinate()
+		self.lineEditWidget.move(pos.x, pos.y)
+
+	def __getFontWeight(self, v):
+		weight = v
+
+		if v == TextFormatWeight.NORMAL:
+			weight = QtGui.QFont.Normal
+		elif v == TextFormatWeight.BOLD:
+			weight = QtGui.QFont.Bold
+		elif v == TextFormatWeight.BOLDER:
+			weight = QtGui.QFont.Black
+		elif v == TextFormatWeight.LIGHTER:
+			weight = QtGui.QFont.Light
+
+		return weight
+
+	def __loop(self, e):
+		if not self.__preVisible == self.visible:
+			if self.visible:
+				self.lineEditWidget.show()
+			else:
+				self.lineEditWidget.hide()
+
+			self.__preVisible = self.visible
+
+		if not (self.__preX == self.x and self.__preY == self.y):
+			pos = self.getRootCoordinate()
+
+			self.lineEditWidget.move(pos.x, pos.y)
+
+			self.__preX = self.x
+			self.__preY = self.y
+
+		w = self.width
+		h = self.height
+
+		if not (self.__preWidth == w and self.__preHeight == h):
+			self.lineEditWidget.resize(w, h)
+
+			self.__preWidth = w
+			self.__preHeight = h
+
+	def die(self):
+		super(LineEdit, self).die()
+
+		self.lineEditWidget.deleteLater()
+
+	def setBackgroundLayer(self, backgroundLayer):
+		self.backgroundLayer.remove()
+
+		self.backgroundLayer = backgroundLayer
+		self.addChild(self.backgroundLayer)
