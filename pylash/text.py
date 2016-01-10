@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 from .display import DisplayObject
-from .utils import Object, getColor
+from .utils import Object, getColor, stage
 
 
 __author__ = "Yuehao Wang"
@@ -36,7 +36,7 @@ class TextFormatWeight(Object):
 
 	def __init__(self):
 		raise Exception("TextFormatWeight cannot be instantiated.")
-			
+
 
 class TextField(DisplayObject):
 	def __init__(self):
@@ -85,18 +85,22 @@ class TextField(DisplayObject):
 		return font
 
 	def __getTextStartX(self):
+		w = self._getOriginalWidth()
+
 		if self.textAlign == TextFormatAlign.END or self.textAlign == TextFormatAlign.RIGHT:
-			return -self.width
+			return -w
 		elif self.textAlign == TextFormatAlign.CENTER:
-			return -self.width / 2
+			return -w / 2
 		else:
 			return 0
 
 	def __getTextStartY(self):
+		h = self._getOriginalHeight()
+
 		if self.textBaseline == TextFormatBaseline.ALPHABETIC or self.textBaseline == TextFormatBaseline.MIDDLE:
-			return -self.height
+			return -h
 		elif self.textBaseline == TextFormatBaseline.MIDDLE:
-			return -self.height / 2
+			return -h / 2
 		else:
 			return 0
 
@@ -105,8 +109,8 @@ class TextField(DisplayObject):
 		flags = QtCore.Qt.AlignCenter
 		startX = self.__getTextStartX()
 		startY = self.__getTextStartY()
-		width = self.width
-		height = self.height
+		width = self._getOriginalWidth()
+		height = self._getOriginalHeight()
 
 		pen = QtGui.QPen()
 		pen.setBrush(QtGui.QBrush(getColor(self.textColor)))

@@ -414,15 +414,15 @@ class TweenLiteChild(Object):
 		del self.__vars["ease"]
 
 		if "onComplete" in self.__vars:
-			self.__onComplete = self.__vars["onComplete"]
+			self._onComplete = self.__vars["onComplete"]
 			del self.__vars["onComplete"]
 		
 		if "onUpdate" in self.__vars:
-			self.__onUpdate = self.__vars["onUpdate"]
+			self._onUpdate = self.__vars["onUpdate"]
 			del self.__vars["onUpdate"]
 		
 		if "onStart" in self.__vars:
-			self.__onStart = self.__vars["onStart"]
+			self._onStart = self.__vars["onStart"]
 			del self.__vars["onStart"]
 
 		for k in self.__vars:
@@ -467,22 +467,22 @@ class TweenLiteChild(Object):
 
 			UnityOfDictAndClass.set(self.__target, tweenType, easeValue)
 		
-		if hasattr(self, "onStart"):
-			self.__dispatchEvent(self.__onStart)
-			del self.__onStart
+		if hasattr(self, "_onStart"):
+			self.__dispatchEvent(self._onStart)
+			del self._onStart
 		
 		e = (self.__currentTime >= self.__duration)
-
+		
 		if e:
 			for tweenType in self.__varsTo:
 				UnityOfDictAndClass.set(self.__target, tweenType, self.__varsTo[tweenType])
-			
-			if hasattr(self, "onComplete"):
-				self.__dispatchEvent(self.__onComplete)
+
+			if hasattr(self, "_onComplete"):
+				self.__dispatchEvent(self._onComplete)
 			
 			return True
-		elif hasattr(self, "onUpdate"):
-			self.__dispatchEvent(self.__onUpdate)
+		elif hasattr(self, "_onUpdate"):
+			self.__dispatchEvent(self._onUpdate)
 		
 		return False
 		
