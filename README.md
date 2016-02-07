@@ -1,7 +1,11 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.4.0**
+[**English**](https://github.com/yuehaowang/pylash_engine/blob/master/README.md)
+|
+[**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
+
+**Latest Version: 1.4.1**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -43,7 +47,7 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 ## Support
 
-If you find the library has some bugs or that you have any questions or advice, please let me know:
+If you find the library has some bugs or that you have any questions or advice, please let us know:
 
 > **My email:** wangyuehao1999@gmail.com
 > 
@@ -83,12 +87,21 @@ Documentation comes soon...
 
 ## Changelog
 
+### version 1.4.1
+
+*Release Date: 3/13/2016*
+
+1. Added `globalToLocal` method in `DisplayObject` class to get a point's position which is relative to the global coordinate.
+2. Added `localToGlobal` method in `DisplayObject` class to get a point's position which is relative to the local coordinate of display object.
+3. Added `Matrix` class in `geom` module to create a matrix used for transforming coordinate.
+4. Added `Transform` class in `geom` module and `transform` property in `DisplayObject`. With them, you can transform display object arbitrarily.
+
 ### version 1.4.0
 
 *Release Date: 2/7/2016*
 
 1. Enhancement: you can set `width`&`height` property of `DisplayObject` to limit the size of display object.
-2. Added `Sound` class to play music.
+2. Added `Sound` class in `media` module to play music.
 3. Enhancement: using `LoadManage.load`, you can load music.
 4. Improvement: `LoadManage` used to use `threading.thread` to create a thread, now it use `QThread`.
 
@@ -96,7 +109,7 @@ Documentation comes soon...
 
 *Release Date: 1/10/2016*
 
-1. Added `LineEdit` class in `ui` module to add single-line input box.
+1. Added `LineEdit` class in `ui` module to create single-line input box.
 2. Added `RankingSystem` in `system` module, which connect server and send requests to add/get ranking.
 3. Added `RankingServer` in `net` module, which is a `socket` server used with `RankingSystem`.
 4. Bugfix: cannot use `onComplete`&`onStart`&`onUpdate` property in `TweenLite`.

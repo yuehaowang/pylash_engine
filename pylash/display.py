@@ -2,7 +2,7 @@ import time, math
 from PyQt4 import QtGui, QtCore
 from .utils import Object, stage, getColor, Stage
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
-from .geom import Point
+from .geom import Point, Transform, Rectangle, Matrix
 
 
 __author__ = "Yuehao Wang"
@@ -22,6 +22,7 @@ class DisplayObject(EventDispatcher):
 		self.scaleY = 1
 		self.visible = True
 		self.blendMode = None
+		self.transform = Transform()
 		self.mask = None
 		self._clipPath = None
 		self._mouseIsOn = False
@@ -93,10 +94,14 @@ class DisplayObject(EventDispatcher):
 
 		c.save()
 
-		c.translate(self.x, self.y)
-		c.setOpacity(self.alpha * c.opacity())
 		c.rotate(self.rotation)
 		c.scale(self.scaleX * widthScale, self.scaleY * heightScale)
+		c.translate(self.x, self.y)
+
+		if self.transform.matrix:
+			self.transform.matrix.transform(c)
+
+		c.setOpacity(self.alpha * c.opacity())
 		c.setCompositionMode(self.__getCompositionMode())
 
 		if self._hasMask():
@@ -144,6 +149,83 @@ class DisplayObject(EventDispatcher):
 
 	def _getOriginalHeight(self):
 		return 0
+
+	def getRootMatrix(self):
+		parent = self
+		m = Matrix()
+
+		while parent and parent != Stage.PARENT:
+			if parent.scaleX != 1 or parent.scaleY != 1:
+				m.scale(parent.scaleX, parent.scaleY)
+
+			if parent.rotation != 0:
+				m.rotate(parent.rotation)
+
+			if parent.x != 0 or parent.y != 0:
+				m.translate(parent.x, parent.y)
+
+			parent = parent.parent
+
+		return m
+
+	def getLocalMatrix(self):
+		parent = self
+		m = Matrix()
+		l = []
+
+		while parent and parent != Stage.PARENT:
+			l.append(parent)
+			parent = parent.parent
+		
+		for parent in l[::-1]:
+			if parent.x != 0 or parent.y != 0:
+				m.translate(-parent.x, -parent.y)
+			
+			if parent.rotation != 0:
+				m.rotate(-parent.rotation)
+			
+			if (parent.scaleX != 1 or parent.scaleY != 1) and parent.scaleX != 0 and parent.scaleY != 0:
+				m.scale(1 / parent.scaleX, 1 / parent.scaleY)
+
+		return m
+
+
+	def getRootCoordinate(self):
+		return self.localToGlobal(Point(0, 0))
+	
+	def localToGlobal(self, point):
+		m = self.getRootMatrix()
+		p = m.toArray([point.x, point.y, 1])
+
+		return Point(p[0], p[1])
+		
+	def globalToLocal(self, point):
+		m = self.getLocalMatrix()
+		p = m.toArray([point.x, point.y, 1])
+
+		return Point(p[0], p[1])
+
+	def getBounds(self, d = None):
+		if d == None:
+			return Rectangle(0, 0, 0, 0)
+		
+		x = 0
+		y = 0
+		w = 0
+		h = 0
+		sp = None
+		dp = None
+
+		if self.objectIndex != d.objectIndex:
+			sp = self.getRootCoordinate()
+			dp = d.getRootCoordinate()
+			x = sp.x - dp.x
+			y = sp.y - dp.y
+		
+		w = self.width
+		h = self.height
+
+		return Rectangle(x, y, w, h)
 
 	def startX(self):
 		return self.x
@@ -717,7 +799,7 @@ class Sprite(DisplayObjectContainer):
 
 		if isOn:
 			if self.useHandCursor:
-				stage.useHandCursor = True
+				stage._useHandCursor = True
 
 			if e["eventType"] == MouseEvent.MOUSE_MOVE.eventType and not self._mouseOver:
 				self._mouseOver = True
@@ -751,7 +833,7 @@ class Sprite(DisplayObjectContainer):
 
 		currentCd = self.__getVisualCoordinate(cd, self)
 
-		stage.useHandCursor = False
+		stage._useHandCursor = False
 
 		self._mouseOver = False
 
