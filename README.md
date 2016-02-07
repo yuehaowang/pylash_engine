@@ -43,7 +43,7 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them first.
 
 ## Support
 
-If you find the library has some bugs or that you have any questions or advice, please let me know:
+If you find the library has some bugs or that you have any questions or advice, please let us know:
 
 > **My email:** wangyuehao1999@gmail.com
 > 
@@ -88,7 +88,7 @@ Documentation comes soon...
 *Release Date: 2/7/2016*
 
 1. Enhancement: you can set `width`&`height` property of `DisplayObject` to limit the size of display object.
-2. Added `Sound` class to play music.
+2. Added `Sound` class in `media` module to play music.
 3. Enhancement: using `LoadManage.load`, you can load music.
 4. Improvement: `LoadManage` used to use `threading.thread` to create a thread, now it use `QThread`.
 
@@ -96,7 +96,7 @@ Documentation comes soon...
 
 *Release Date: 1/10/2016*
 
-1. Added `LineEdit` class in `ui` module to add single-line input box.
+1. Added `LineEdit` class in `ui` module to create single-line input box.
 2. Added `RankingSystem` in `system` module, which connect server and send requests to add/get ranking.
 3. Added `RankingServer` in `net` module, which is a `socket` server used with `RankingSystem`.
 4. Bugfix: cannot use `onComplete`&`onStart`&`onUpdate` property in `TweenLite`.
