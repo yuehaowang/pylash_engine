@@ -25,34 +25,30 @@ class DisplayObject(EventDispatcher):
 		self.mask = None
 		self._clipPath = None
 		self._mouseIsOn = False
-		self.__setWidthScale = 1
-		self.__setHeightScale = 1
+		self.__setWidth = None
+		self.__setHeight = None
 
 	@property
 	def width(self):
-		return self._getOriginalWidth() * abs(self.scaleX) * abs(self.__setWidthScale)
+		if self.__setWidth:
+			return self.__setWidth * abs(self.scaleX)
+		else:
+			return self._getOriginalWidth() * abs(self.scaleX)
 
 	@width.setter
 	def width(self, w):
-		ow = self._getOriginalWidth()
-
-		if ow == 0:
-			return
-
-		self.__setWidthScale = w / self._getOriginalWidth()
+		self.__setWidth = w
 
 	@property
 	def height(self):
-		return self._getOriginalHeight() * abs(self.scaleY) * abs(self.__setHeightScale)
+		if self.__setHeight:
+			return self.__setHeight * abs(self.scaleY)
+		else:
+			return self._getOriginalHeight() * abs(self.scaleY)
 
 	@height.setter
 	def height(self, h):
-		oh = self._getOriginalHeight()
-
-		if oh == 0:
-			return
-
-		self.__setHeightScale = h / self._getOriginalHeight()
+		self.__setHeight = h
 
 	def __getCompositionMode(self):
 		v = self.blendMode
@@ -86,12 +82,21 @@ class DisplayObject(EventDispatcher):
 		
 		self._loopFrame()
 
+		widthScale = 1
+		heightScale = 1
+
+		if self.__setWidth:
+			widthScale = self.__setWidth / self._getOriginalWidth()
+
+		if self.__setHeight:
+			heightScale = self.__setHeight / self._getOriginalHeight()
+
 		c.save()
 
 		c.translate(self.x, self.y)
 		c.setOpacity(self.alpha * c.opacity())
 		c.rotate(self.rotation)
-		c.scale(self.scaleX * self.__setWidthScale, self.scaleY * self.__setHeightScale)
+		c.scale(self.scaleX * widthScale, self.scaleY * heightScale)
 		c.setCompositionMode(self.__getCompositionMode())
 
 		if self._hasMask():

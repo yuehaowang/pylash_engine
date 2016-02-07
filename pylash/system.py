@@ -1,19 +1,35 @@
 import threading, time, socket
+from PyQt4 import QtCore
 from .utils import Object, stage
 from .display import Loader
 from .events import Event, EventDispatcher, RankingSystemEvent
+from .media import Sound
 
 
 __author__ = "Yuehao Wang"
+
+
+class LoadThread(QtCore.QThread):
+	loadOne = QtCore.pyqtSignal(dict)
+
+	def __init__(self, target):
+		super(LoadThread, self).__init__()
+
+		self.__target = target
+
+	def run(self):
+		self.__target(self);
 
 
 class LoadManage(Object):
 	__resultList = {}
 	__loadListLength = 0
 	__loadIndex = 0
+	__soundIndex = 0
 	__onUpdate = None
 	__onComplete = None
 	__isLoadComplete = False
+	__soundObjectList = None
 	delay = 50
 
 	def __init__():
@@ -27,31 +43,66 @@ class LoadManage(Object):
 
 			self.__isLoadComplete = False
 
+			del self.__resultList
+
 	def load(loadList, onUpdate = None, onComplete = None):
-		LoadManage.__resultList = {}
-		LoadManage.__loadIndex = 0
-		LoadManage.__loadListLength = len(loadList)
-		LoadManage.__onUpdate = onUpdate
-		LoadManage.__onComplete = onComplete
+		self = LoadManage
+		self.__resultList = {}
+		self.__loadIndex = 0
+		self.__soundIndex = 0
+		self.__loadListLength = len(loadList)
+		self.__onUpdate = onUpdate
+		self.__onComplete = onComplete
+		self.__soundObjectList = []
 
-		def startLoad():
-			for o in loadList:
+		for o in loadList:
+			path = None
+			extension = None
+
+			if "path" in o:
 				path = o["path"]
+			else:
+				raise ValueError("LoadManage.load(loadList, onUpdate = None, onComplete = None): parameter 'loadList' has a wrong item which dosen't have a key named 'path'.")
 
-				loader = Loader()
+			extension = self.getExtension(path)
 
-				if "name" in o:
-					loader.name = o["name"]
+			if extension in ["mp3", "ogg", "wav", "m4a"]:
+				o["type"] = "sound"
 
-				loader.addEventListener(Event.COMPLETE, LoadManage.loadComplete)
+				self.__soundObjectList.append(Sound())
+			else:
+				o["type"] = "image"
 
-				if "path" in o:
-					loader.load(o["path"])
 
-		loadThread = threading.Thread(target = startLoad)
-		loadThread.start()
+		def startLoad(thread):
+			for o in loadList:
+				thread.loadOne.emit(o)
 
-	def loadComplete(e):
+		self.__loadThread = LoadThread(startLoad)
+		self.__loadThread.loadOne.connect(self.__loadOneResource)
+		self.__loadThread.start()
+
+	@QtCore.pyqtSlot(dict)
+	def __loadOneResource(o):
+		self = LoadManage
+		t = o["type"]
+		loader = None
+
+		if t == "sound":
+			loader = self.__soundObjectList[self.__soundIndex]
+
+			self.__soundIndex += 1
+		elif t == "image":
+			loader = Loader()
+
+		if "name" in o:
+			loader.name = o["name"]
+
+		loader.addEventListener(Event.COMPLETE, self.__loadComplete)
+
+		loader.load(o["path"])
+
+	def __loadComplete(e):
 		self = LoadManage
 		name = e.currentTarget.name
 
@@ -62,10 +113,20 @@ class LoadManage(Object):
 		if hasattr(self.__onUpdate, "__call__"):
 			self.__onUpdate(self.__loadIndex * 100 / self.__loadListLength)
 
+		del e.currentTarget
+
 		time.sleep(self.delay / 1000)
 
 		if self.__loadIndex >= self.__loadListLength:
 			self.__isLoadComplete = True
+
+			del self.__soundObjectList
+			del self.__loadThread
+
+	def getExtension(p):
+		pList = p.split(".")
+		
+		return pList[len(pList) - 1]
 
 stage.childList.append(LoadManage)
 
