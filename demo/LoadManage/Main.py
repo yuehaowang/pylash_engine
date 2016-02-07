@@ -8,6 +8,7 @@ from pylash.utils import init, addChild
 from pylash.system import LoadManage
 from pylash.display import BitmapData, Bitmap
 from pylash.ui import LoadingSample3
+from pylash.media import Sound
 
 loadingBar = None
 
@@ -15,6 +16,7 @@ def main():
 	global loadingBar
 
 	loadList = [
+		{"name" : "bgm", "path" : "./bgm.mp3"},
 		{"name" : "1", "path" : "./1.jpg"},
 		{"name" : "2", "path" : "./2.jpg"},
 		{"name" : "3", "path" : "./3.jpg"},
@@ -40,5 +42,8 @@ def demoInit(result):
 		bmp.y += i * 150
 		addChild(bmp)
 
+	sound = Sound()
+	sound.load(result["bgm"])
+	sound.play()
 
 init(1000 / 60, "LoadManage demo", 1000, 800, main)

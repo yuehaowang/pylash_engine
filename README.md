@@ -1,7 +1,7 @@
 # Pylash Engine
 ---------------
 
-**Latest Version: 1.3.3**
+**Latest Version: 1.4.0**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -47,7 +47,7 @@ If you find the library has some bugs or that you have any questions or advice, 
 
 > **My email:** wangyuehao1999@gmail.com
 > 
-> **My twitter:** [twitter.com/yuehaowang](twitter.com/yuehaowang)
+> **My twitter:** [https://twitter.com/yuehaowang](https://twitter.com/yuehaowang)
 
 Bugs can be submited into [Github Issues](https://github.com/yuehaowang/pylash_engine/issues) too.
 
@@ -83,9 +83,18 @@ Documentation comes soon...
 
 ## Changelog
 
+### version 1.4.0
+
+*Release Date: 2/7/2016*
+
+1. Enhancement: you can set `width`&`height` property of `DisplayObject` to limit the size of display object.
+2. Added `Sound` class to play music.
+3. Enhancement: using `LoadManage.load`, you can load music.
+4. Improvement: `LoadManage` used to use `threading.thread` to create a thread, now it use `QThread`.
+
 ### version 1.3.3
 
-*Release Date: 1/10/2015*
+*Release Date: 1/10/2016*
 
 1. Added `LineEdit` class in `ui` module to add single-line input box.
 2. Added `RankingSystem` in `system` module, which connect server and send requests to add/get ranking.

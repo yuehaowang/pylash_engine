@@ -276,4 +276,4 @@ def removeItemsInList(theList, condition):
 	for i in targetList:
 		theList.remove(i)
 
-	return targetList
+	return targetList		
