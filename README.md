@@ -2,6 +2,7 @@
 ---------------
 
 [**English**](https://github.com/yuehaowang/pylash_engine/blob/master/README.md)
+|
 [**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
 
 **Latest Version: 1.4.0**
