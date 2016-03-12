@@ -5,14 +5,14 @@
 |
 [**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
 
-**最新版本：1.4.0**
+**最新版本：1.4.1**
 
 `Pylash`是一个`python`游戏引擎，它模仿了一些`flash`中的类和功能。我们使用`Python3`和GUI引擎`PyQt4`开发`pylash`。许多来自`flash`的类，例如：`Sprite`，`BitmapData`，`Bitmap`，`TextField`，`Loader`，`Graphics`都可以在`pylash`中被找到。
 
 
 ## 开源协议：MIT License
 
-我们使用[MIT License](http://en.wikipedia.org/wiki/MIT_License)，它是一个免费、友好的协议。除此之外，你也必须遵守`PyQt4`的协议，因为`pylash`是基于它开发而来。
+我们使用[MIT License](http://en.wikipedia.org/wiki/MIT_License)，它是一个免费、友好的开源协议。除此之外，你也必须遵守`PyQt4`的协议，因为`pylash`是基于它开发而来的。
 
 
 ## 获取Pylash
@@ -86,6 +86,15 @@ git clone git@github.com:yuehaowang/pylash_engine.git
 
 
 ## 更新日志
+
+### 版本 1.4.1
+
+*发布日期：3/13/2016*
+
+1. 在`DisplayObject`类中加入了`globalToLocal`方法，用于获取一个点相对于全局坐标系的位置。
+2. 在`DisplayObject`类中加入了`localToGlobal`方法，用于获取一个点相对于显示对象本地坐标的位置。
+3. 在`geom`模块中加入了`Matrix`类，用于创建变换坐标的矩阵。
+4. 在`geom`模块中加入了`Transform`类，以及为`DisplayObject`中添加了`transform`属性，使用它们，你可以任意地变换显示对象。
 
 ### 版本 1.4.0
 

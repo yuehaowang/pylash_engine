@@ -28,11 +28,11 @@ class CanvasWidget(QtGui.QWidget):
 		self.__enterMouseEvent(event, "mouse_down")
 
 	def mouseMoveEvent(self, event):
-		stage.useHandCursor = False
+		stage._useHandCursor = False
 
 		self.__enterMouseEvent(event, "mouse_move")
 
-		if stage.useHandCursor:
+		if stage._useHandCursor:
 			self.setCursor(QtCore.Qt.PointingHandCursor)
 		else:
 			self.setCursor(QtCore.Qt.ArrowCursor)
@@ -74,10 +74,17 @@ class CanvasWidget(QtGui.QWidget):
 
 
 class Stage(Object):
+	PARENT = "root"
+
 	def __init__(self):
 		super(Stage, self).__init__()
 		
-		self.parent = "root"
+		self.parent = Stage.PARENT
+		self.x = 0
+		self.y = 0
+		self.scaleX = 1
+		self.scaleY = 1
+		self.rotation = 0
 		self.width = 0
 		self.height = 0
 		self.speed = 0
@@ -88,9 +95,9 @@ class Stage(Object):
 		self.childList = []
 		self.backgroundColor = None
 		self.useAntialiasing = True
-		self.useHandCursor = False
+		self._useHandCursor = False
 		self._keyboardEventList = []
-	
+
 	def _setCanvas(self, speed, title, width, height):
 		self.speed = speed
 		self.width = width

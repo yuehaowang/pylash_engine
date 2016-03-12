@@ -5,7 +5,7 @@
 |
 [**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
 
-**Latest Version: 1.4.0**
+**Latest Version: 1.4.1**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -86,6 +86,15 @@ Documentation comes soon...
 
 
 ## Changelog
+
+### version 1.4.1
+
+*Release Date: 3/13/2016*
+
+1. Added `globalToLocal` method in `DisplayObject` class to get a point's position which is relative to the global coordinate.
+2. Added `localToGlobal` method in `DisplayObject` class to get a point's position which is relative to the local coordinate of display object.
+3. Added `Matrix` class in `geom` module to create a matrix used for transforming coordinate.
+4. Added `Transform` class in `geom` module and `transform` property in `DisplayObject`. With them, you can transform display object arbitrarily.
 
 ### version 1.4.0
 

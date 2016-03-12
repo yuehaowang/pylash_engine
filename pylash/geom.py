@@ -1,4 +1,5 @@
 import math
+from PyQt4 import QtGui
 from .utils import Object
 
 
@@ -16,6 +17,9 @@ class Point(Object):
 		
 		self.x = x
 		self.y = y
+
+	def __str__(self):
+		return "Point(%s, %s)" % (self.x, self.y)
 
 	def distance(p1, p2):
 		return Point.distance2(p1.x, p1.y, p2.x, p2.y)
@@ -197,3 +201,131 @@ class Rectangle(Object):
 
 	def union(self, t):
 		return Rectangle(t.x if self.x > t.x else self.x, t.y if self.y > t.y else self.y, self.right if self.right > t.right else t.right, self.bottom if self.bottom > t.bottom else t.bottom)
+
+
+class Matrix(Object):
+	def __init__(self, a = None, b = None, c = None, d = None, tx = None, ty = None, u = None, v = None, w = None):
+		super(Matrix, self).__init__()
+
+		self.a = 1
+		self.b = 0
+		self.u = 0
+		self.c = 0
+		self.d = 1
+		self.v = 0
+		self.tx = 0
+		self.ty = 0
+		self.w = 1
+		
+		self.setTo(a, b, c, d, tx, ty, u, v, w)
+
+	def setTo(self, a = None, b = None, c = None, d = None, tx = None, ty = None, u = None, v = None, w = None):
+		if a != None:
+			self.a = a
+
+		if b != None:
+			self.b = b
+
+		if c != None:
+			self.c = c
+
+		if d != None:
+			self.d = d
+
+		if tx != None:
+			self.tx = tx
+
+		if ty != None:
+			self.ty = ty
+
+		if u != None:
+			self.u = u
+
+		if v != None:
+			self.v = v
+
+		if w != None:
+			self.w = w
+
+	def isDentity(self):
+		return (self.a == 1 and self.b == 0 and self.c == 0 and self.d == 1 and self.tx == 0 and self.ty == 0 and self.u == 0 and self.v == 0 and self.w == 1)
+
+	def transform(self, c):
+		c.setTransform(self.toQTransform(), True)
+
+	def identity(self):
+		self.setTo(1, 0, 0, 1, 0, 0, 0, 0, 1)
+	
+	def rotate(self, q):
+		radian = q * math.pi / 180
+		cos = math.cos(radian)
+		sin = math.sin(radian)
+		
+		mtx = Matrix(cos, sin, -sin, cos, 0, 0, 0, 0, 1)
+		self.add(mtx)
+
+		return self
+
+	def scale(self, sx, sy):
+		mtx = Matrix(sx, 0, 0, sy, 0, 0, 0, 0, 1)
+		self.add(mtx)
+		
+		return self
+
+	def translate(self, tx, ty):
+		mtx = Matrix(1, 0, 0, 1, tx, ty, 0, 0, 1)
+		self.add(mtx)
+
+		return self
+
+	def skew(self, kx, ky):
+		mtx = Matrix(1, ky, kx, 1, 0, 0, 0, 0, 1)
+		self.add(mtx)
+
+		return self
+
+	def add(self, mtx):
+		a = self.a * mtx.a + self.b * mtx.c + self.u * mtx.tx
+		b = self.a * mtx.b + self.b * mtx.d + self.u * mtx.ty
+		u = self.a * mtx.u + self.b * mtx.v + self.u * mtx.w
+		c = self.c * mtx.a + self.d * mtx.c + self.v * mtx.tx
+		d = self.c * mtx.b + self.d * mtx.d + self.v * mtx.ty
+		v = self.c * mtx.u + self.d * mtx.v + self.v * mtx.w
+		tx = self.tx * mtx.a + self.ty * mtx.c + self.w * mtx.tx
+		ty = self.tx * mtx.b + self.ty * mtx.d + self.w * mtx.ty
+		w = self.tx * mtx.u + self.ty * mtx.v + self.w * mtx.w
+		
+		self.setTo(a, b, c, d, tx, ty, u, v, w)
+
+	def toArray(self, mtx):
+		if isinstance(mtx, list) and len(mtx) == 3:
+			m = mtx[0] * self.a + mtx[1] * self.c + mtx[2] * self.tx
+			n = mtx[0] * self.b + mtx[1] * self.d + mtx[2] * self.ty
+			k = mtx[0] * self.u + mtx[1] * self.v + mtx[2] * self.w
+			
+			return [m, n, k]
+		else:
+			a = self.a * mtx.a + self.b * mtx.c + self.u * mtx.tx
+			b = self.a * mtx.b + self.b * mtx.d + self.u * mtx.ty
+			u = self.a * mtx.u + self.b * mtx.v + self.u * mtx.w
+			c = self.c * mtx.a + self.d * mtx.c + self.v * mtx.tx
+			d = self.c * mtx.b + self.d * mtx.d + self.v * mtx.ty
+			v = self.c * mtx.u + self.d * mtx.v + self.v * mtx.w
+			tx = self.tx * mtx.a + self.ty * mtx.c + self.w * mtx.tx
+			ty = self.tx * mtx.b + self.ty * mtx.d + self.w * mtx.ty
+			w = self.tx * mtx.u + self.ty * mtx.v + self.w * mtx.w
+			
+			return [a, b, c, d, tx, ty, u, v, w]
+
+	def toList(self, mtx):
+		return self.toArray(mtx)
+
+	def toQTransform(self):
+		return QtGui.QTransform(self.a, self.b, self.c, self.d, self.tx, self.ty)
+
+
+class Transform(Object):
+	def __init__(self):
+		super(Transform, self).__init__()
+
+		self.matrix = None
