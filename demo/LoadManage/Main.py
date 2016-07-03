@@ -25,7 +25,7 @@ def main():
 
 	loadingBar = LoadingSample3()
 	addChild(loadingBar)
-
+	
 	LoadManage.load(loadList, loadingBar.setProgress, demoInit)
 
 def demoInit(result):
