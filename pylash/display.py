@@ -94,9 +94,9 @@ class DisplayObject(EventDispatcher):
 
 		c.save()
 
+		c.translate(self.x, self.y)
 		c.rotate(self.rotation)
 		c.scale(self.scaleX * widthScale, self.scaleY * heightScale)
-		c.translate(self.x, self.y)
 
 		if self.transform.matrix:
 			self.transform.matrix.transform(c)
