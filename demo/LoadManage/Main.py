@@ -43,6 +43,7 @@ def demoInit(result):
 		addChild(bmp)
 
 	sound = Sound()
+	sound.loop = True
 	sound.load(result["bgm"])
 	sound.play()
 
