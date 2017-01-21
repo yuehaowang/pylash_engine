@@ -18,7 +18,7 @@ class LoadThread(QtCore.QThread):
 		self.__target = target
 
 	def run(self):
-		self.__target(self);
+		self.__target(self)
 
 
 class LoadManage(Object):

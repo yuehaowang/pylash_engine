@@ -1,4 +1,4 @@
-from PyQt4 import QtWebKit, QtCore
+from PyQt4 import QtWebKit, QtCore, QtGui
 from PyQt4.phonon import Phonon
 from .utils import stage
 from .events import EventDispatcher, Event, MediaEvent
@@ -47,22 +47,31 @@ class StageWebView(EventDispatcher):
 		mainFrame.setScrollBarPolicy(QtCore.Qt.Vertical, p2)
 
 
-class Media(EventDispatcher, QtCore.QObject):
+class Media(EventDispatcher, QtGui.QWidget):
 	ignoreLoadingError = False
 
-	def __init__(self, url = None):
+	TYPE_SOUND = "type_sound"
+
+	def __init__(self, type, url = None):
 		EventDispatcher.__init__(self)
-		QtCore.QObject.__init__(self)
+		QtGui.QWidget.__init__(self)
+
+		self.setParent(stage.canvasWidget)
+		self.show()
 
 		self.__mediaSource = None
-		self.mediaObject = Phonon.MediaObject(stage.canvasWidget)
+		self.mediaNode = None
+		self.mediaObject = Phonon.MediaObject(self)
 		self.__playing = False
 		self.loop = False
 		self.loopTimes = None
 		self.__loopIndex = 0
 		self.__startTime = 0
 
-		if hasattr(self, "mediaNode") and self.mediaNode:
+		if type == Media.TYPE_SOUND:
+			self.mediaNode = Phonon.AudioOutput(Phonon.MusicCategory, self)
+
+		if self.mediaNode:
 			Phonon.createPath(self.mediaObject, self.mediaNode)
 
 		self.mediaObject.stateChanged.connect(self.__onStateChanged)
@@ -107,6 +116,8 @@ class Media(EventDispatcher, QtCore.QObject):
 
 			self.__mediaSource = None
 
+			return
+
 		if newState == Phonon.PlayingState:
 			self.dispatchEvent(MediaEvent.PLAY)
 		elif newState == Phonon.PausedState:
@@ -136,6 +147,8 @@ class Media(EventDispatcher, QtCore.QObject):
 		
 		self.__mediaSource.setAutoDelete(True)
 		self.mediaObject.setCurrentSource(self.__mediaSource)
+
+		self.mediaObject.stop()
 
 	def play(self, start = 0):
 		self.__playing = True
@@ -173,6 +186,4 @@ class Media(EventDispatcher, QtCore.QObject):
 
 class Sound(Media):
 	def __init__(self, url = None):
-		self.mediaNode = Phonon.AudioOutput(Phonon.MusicCategory, stage.canvasWidget)
-
-		super(Sound, self).__init__(url)
+		super(Sound, self).__init__(Media.TYPE_SOUND, url)
