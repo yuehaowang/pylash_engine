@@ -64,14 +64,15 @@ class LoadManage(Object):
 			else:
 				raise ValueError("LoadManage.load(loadList, onUpdate = None, onComplete = None): parameter 'loadList' has a wrong item which dosen't have a key named 'path'.")
 
-			extension = self.getExtension(path)
+			if not "type" in o:
+				extension = self.getExtension(path)
 
-			if extension in ["mp3", "ogg", "wav", "m4a"]:
-				o["type"] = "sound"
+				if extension in ["mp3", "ogg", "wav", "m4a"]:
+					o["type"] = "sound"
 
-				self.__soundObjectList.append(Sound())
-			else:
-				o["type"] = "image"
+					self.__soundObjectList.append(Sound())
+				else:
+					o["type"] = "image"
 
 
 		def startLoad(thread):
