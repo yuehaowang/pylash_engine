@@ -5,7 +5,7 @@
 |
 [**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
 
-**Latest Version: 1.4.1**
+**Latest Version: 1.4.2**
 
 `Pylash` is a game engine for `python` which imitates some classes and functions in `flash`. We develop `pylash` with `Python3` and the GUI engine of `pylash` is `PyQt4`. Many classes which are almost from `flash` such as `Sprite`, `BitmapData`, `Bitmap`, `TextField`, `Loader` and `Graphics` will be found in `pylash`.
 
@@ -86,6 +86,12 @@ Documentation comes soon...
 
 
 ## Changelog
+
+### version 1.4.2
+
+*Release Date: 1/22/2017*
+
+Bugfix: cannot load and play music on Ubuntu.
 
 ### version 1.4.1
 

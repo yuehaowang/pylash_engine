@@ -5,7 +5,7 @@
 |
 [**中文**](https://github.com/yuehaowang/pylash_engine/blob/master/README_chs.md)
 
-**最新版本：1.4.1**
+**最新版本：1.4.2**
 
 `Pylash`是一个`python`游戏引擎，它模仿了一些`flash`中的类和功能。我们使用`Python3`和GUI引擎`PyQt4`开发`pylash`。许多来自`flash`的类，例如：`Sprite`，`BitmapData`，`Bitmap`，`TextField`，`Loader`，`Graphics`都可以在`pylash`中被找到。
 
@@ -86,6 +86,12 @@ git clone git@github.com:yuehaowang/pylash_engine.git
 
 
 ## 更新日志
+
+### 版本 1.4.2
+
+*发布日期：1/22/2017*
+
+【Bug修复】无法在Ubuntu上加载和播放音乐。
 
 ### 版本 1.4.1
 
