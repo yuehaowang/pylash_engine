@@ -87,7 +87,7 @@ class GameLayer(Sprite):
 		clickX = math.floor(e.selfX / 50)
 		clickY = math.floor(e.selfY / 50)
 
-		shapeLayer = self.blockLayer.getChildAt(0);
+		shapeLayer = self.blockLayer.getChildAt(0)
 
 		b = shapeLayer.getChildAt(clickY * 10 + clickX)
 

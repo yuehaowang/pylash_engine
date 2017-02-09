@@ -2,7 +2,7 @@ import time, math
 from PyQt4 import QtGui, QtCore
 from .utils import Object, stage, getColor, Stage
 from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
-from .geom import Point, Transform, Rectangle, Matrix
+from .geom import Point, Transform, Rectangle, Polygon, Circle, Matrix, SAT
 
 
 __author__ = "Yuehao Wang"
@@ -188,7 +188,6 @@ class DisplayObject(EventDispatcher):
 				m.scale(1 / parent.scaleX, 1 / parent.scaleY)
 
 		return m
-
 
 	def getRootCoordinate(self):
 		return self.localToGlobal(Point(0, 0))
@@ -599,7 +598,7 @@ class InteractiveObject(DisplayObject):
 
 	def hasEventListener(self, e, listener):
 		if self.__isMouseEvent(e):
-			self._hasEventListenerInList(e, listener, self._mouseEventList)
+			return self._hasEventListenerInList(e, listener, self._mouseEventList)
 		else:
 			return super(InteractiveObject, self).hasEventListener(e, listener)
 
@@ -690,6 +689,7 @@ class Sprite(DisplayObjectContainer):
 		self.graphics = Graphics()
 		self.graphics.parent = self
 		self.useHandCursor = False
+		self.shapes = None
 		self._clipPath = self.graphics._clipPath
 
 	def _loopDraw(self, c):
@@ -872,6 +872,45 @@ class Sprite(DisplayObjectContainer):
 
 	def _getOriginalHeight(self):
 		return self.endY() - self.startY()
+
+	def addShape(self, sh):
+		if not isinstance(self.shapes, list):
+			self.shapes = []
+
+		if isinstance(sh, Rectangle):
+			sh = Polygon(sh)
+
+		self.shapes.append(sh)
+
+	def clearShapes(self):
+		self.shapes = None
+
+	def hitTestObject(self, obj):
+		shListA = None
+		shListB = None
+		mA = self.getRootMatrix()
+		mB = obj.getRootMatrix()
+
+		if not isinstance(self.shapes, list):
+			shListA = [Polygon(Rectangle(0, 0, self._getOriginalWidth(), self._getOriginalHeight()))]
+		else:
+			shListA = self.shapes
+
+		if not isinstance(obj.shapes, list):
+			shListB = [Polygon(Rectangle(0, 0, obj._getOriginalWidth(), obj._getOriginalHeight()))]
+		else:
+			shListB = obj.shapes
+
+		for itm in shListA:
+			shA = itm.getTransform(mA)
+
+			for ite in shListB:
+				shB = ite.getTransform(mB)
+
+				if SAT.hitTest(shA, shB):
+					return True
+
+		return False
 
 
 class Shape(DisplayObject):
@@ -1105,6 +1144,9 @@ class Graphics(DisplayObject):
 
 		self._clipPath.lineTo(x, y)
 		self.__dataList.append({"startX" : x, "startY" : y, "endX" : x, "endY" : y})
+
+	def closePath(self):
+		self.__currentGraphics["path"].closeSubpath()
 
 	def drawRect(self, x, y, width, height):
 		if not self.__currentGraphics:

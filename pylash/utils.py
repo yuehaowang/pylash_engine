@@ -112,7 +112,7 @@ class Stage(Object):
 
 		self.timer = QtCore.QTimer()
 		self.timer.setInterval(speed)
-		self.timer.start();
+		self.timer.start()
 
 		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.canvasWidget, QtCore.SLOT("update()"))
 

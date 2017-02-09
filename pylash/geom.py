@@ -28,7 +28,7 @@ class Point(Object):
 		x = x1 - x2
 		y = y1 - y2
 
-		return math.sqrt(x * x + y * y)
+		return math.sqrt(x ** 2 + y ** 2)
 
 	def interpolate(p1, p2, f):
 		return Point(p1.x + (p2.x - p1.x) * (1 - f), p1.y + (p2.y - p1.y) * (1 - f))
@@ -201,6 +201,237 @@ class Rectangle(Object):
 
 	def union(self, t):
 		return Rectangle(t.x if self.x > t.x else self.x, t.y if self.y > t.y else self.y, self.right if self.right > t.right else t.right, self.bottom if self.bottom > t.bottom else t.bottom)
+
+
+class Circle(Object):
+	def __init__(self, x = 0, y = 0, r = 0):
+		super(Circle, self).__init__()
+
+		self.x = x
+		self.y = y
+		self.r = r
+
+	def getTransform(self, m):
+		v1 = m.toArray([self.x, self.y, 1])
+		v2 = m.toArray([self.x + self.r, self.y, 1])
+		dx = v1[0] - v2[0]
+		dy = v1[1] - v2[1]
+
+		return Circle(v1[0], v1[1], math.sqrt(dx ** 2 + dy ** 2))
+
+	def getProjection(self, axis):
+		pro = Vec2.dot(Vec2(self.x, self.y), axis) / axis.length()
+
+		return {"min" : pro - self.r, "max" : pro + self.r}
+
+
+class Polygon(Object):
+	def __init__(self, o = None):
+		super(Polygon, self).__init__()
+
+		if isinstance(o, list):
+			self.vertices = o
+		elif isinstance(o, Rectangle):
+			x = o.x
+			y = o.y
+			w = o.width
+			h = o.height
+
+			self.vertices = [Vec2(x, y), Vec2(x + w, y), Vec2(x + w, y + h), Vec2(x, y + h)]
+		else:
+			self.vertices = []
+
+	def getTransform(self, m):
+		res = []
+
+		for p in self.vertices:
+			arr = m.toArray([p.x, p.y, 1])
+			res.append(Vec2(arr[0], arr[1]))
+
+		return Polygon(res)
+
+	def getSides(self):
+		vtx = self.vertices
+		l = len(vtx)
+		res = []
+
+		if l >= 3:
+			preP = vtx[0]
+
+			for p in vtx[1:]:
+				res.append(Vec2.substract(p, preP))
+
+				preP = p
+
+			res.append(Vec2.substract(vtx[0], vtx[l - 1]))
+
+		return res
+
+	def getProjection(self, axis):
+		vtx = self.vertices
+		mini = None
+		maxi = None
+
+		for p in vtx:
+			pro = Vec2.dot(p, axis) / axis.length()
+
+			if mini == None or pro < mini:
+				mini = pro
+
+			if maxi == None or pro > maxi:
+				maxi = pro
+
+		return {"min" : mini, "max" : maxi}
+
+	def getNearestPoint(self, p1):
+		vtx = self.vertices
+		rP = vtx[0]
+		minDis = Vec2.distance(p1, rP)
+
+		for p2 in vtx[1:]:
+			d = Vec2.distance(p1, p2)
+
+			if d < minDis:
+				minDis = d
+				rP = p2
+
+		return rP
+
+
+class Vec2(Object):
+	def __init__(self, x = 0, y = 0):
+		super(Vec2, self).__init__()
+		
+		self.x = x
+		self.y = y
+
+	def __str__(self):
+		return "Vec2(%s, %s)" % (self.x, self.y)
+
+	def __add__(self, v):
+		return Vec2.add(self, v)
+
+	def __sub__(self, v):
+		return Vec2.substract(self, v)
+	
+	def distance(v1, v2):
+		dx = v1.x - v2.x
+		dy = v1.y - v2.y
+
+		return math.sqrt(dx ** 2 + dy ** 2)
+
+	def add(v1, v2):
+		return Vec2(v1.x + v2.x, v1.y + v2.y)
+
+	def substract(v1, v2):
+		return Vec2(v1.x - v2.x, v1.y - v2.y)
+
+	def dot(v1, v2):
+		return v1.x * v2.x + v1.y * v2.y
+
+	def cross(v1, v2):
+		return v1.x * v2.y - v1.y * v2.x
+
+	def length(self):
+		return math.sqrt(self.x ** 2 + self.y ** 2)
+
+	def normalize(self):
+		l = self.length()
+
+		return Vec2(self.x / l, self.y / l)
+
+	def normL(self):
+		return Vec2(self.y, -self.x)
+
+	def normR(self):
+		return Vec2(-self.y, self.x)
+
+
+class SAT(object):
+	def __init__(self):
+		raise Exception("SAT cannot be instantiated.")
+
+	def hitTest(A, B):
+		res = None
+
+		if isinstance(A, Polygon) and isinstance(B, Polygon):
+			res = SAT.hitTestPolygons(A, B)
+		elif isinstance(A, Circle) and isinstance(B, Circle):
+			res = SAT.hitTestCircles(A, B)
+		else:
+			c = None
+			p = None
+
+			if isinstance(A, Circle):
+				c = A;
+				p = B;
+			else:
+				c = B;
+				p = A;
+
+			res = SAT.hitTestCircleAndPolygon(c, p);
+
+		return res
+
+	def hitTestPolygons(a, b):
+		sides = a.getSides()
+		sides.extend(b.getSides())
+		axises = []
+
+		for side in sides:
+			axises.append(side.normL())
+
+		return SAT.__isGap(axises, a, b)
+
+	def hitTestCircles(a, b):
+		axis = Vec2(a.x - b.x, a.y - b.y)
+		
+		proA = a.getProjection(axis)
+		proB = b.getProjection(axis)
+
+		if SAT.__isOverlay(proA, proB):
+			return False
+
+		return True
+
+	def hitTestCircleAndPolygon(c, p):
+		sides = p.getSides()
+		axises = []
+
+		for side in sides:
+			axises.append(side.normL())
+
+		p1 = p.getNearestPoint(Vec2(c.x, c.y))
+
+		axises.append(Vec2(p1.x - c.x, p1.y - c.y))
+
+		return SAT.__isGap(axises, c, p)
+
+	def __isGap(axises, a, b):
+		for axis in axises:
+			proA = a.getProjection(axis)
+			proB = b.getProjection(axis)
+
+			if SAT.__isOverlay(proA, proB):
+				return False
+
+		return True
+
+	def __isOverlay(proA, proB):
+		mini = None
+		maxi = None
+
+		if proA["min"] < proB["min"]:
+			mini = proA["min"]
+		else:
+			mini = proB["min"]
+
+		if proA["max"] > proB["max"]:
+			maxi = proA["max"]
+		else:
+			maxi = proB["max"]
+
+		return (proA["max"] - proA["min"]) + (proB["max"] - proB["min"]) < maxi - mini
 
 
 class Matrix(Object):

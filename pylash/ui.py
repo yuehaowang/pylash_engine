@@ -167,7 +167,7 @@ class LoadingSample1(LoadingSample):
 
 		if not "progressColor" in opt:
 			opt["progressColor"] = RadialGradientColor(self.__blockWidth * 7.5, self.__blockHeight * 2.5, self.__blockWidth * 7.5)
-			opt["progressColor"].addColorStop(0, "red");  
+			opt["progressColor"].addColorStop(0, "red")
 			opt["progressColor"].addColorStop(0.3, "orange")
 			opt["progressColor"].addColorStop(0.4, "yellow")
 			opt["progressColor"].addColorStop(0.5, "green")
@@ -335,7 +335,7 @@ class LoadingSample2(LoadingSample):
 
 		if not "progressColor" in opt:
 			opt["progressColor"] = RadialGradientColor(txt.width / 2, txt.height / 2, txt.width / 2)
-			opt["progressColor"].addColorStop(0, "red");  
+			opt["progressColor"].addColorStop(0, "red")
 			opt["progressColor"].addColorStop(0.3, "orange")
 			opt["progressColor"].addColorStop(0.4, "yellow")
 			opt["progressColor"].addColorStop(0.5, "green")
