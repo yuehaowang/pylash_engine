@@ -1,9 +1,8 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, math
+import math
 
-sys.path.insert(0, "../../")
 from pylash.utils import init, addChild, stage
 from pylash.display import Sprite
 from pylash.events import MouseEvent
@@ -146,6 +145,5 @@ class DraggableShape(Sprite):
 
 		isDragging = True
 		draggingObj = self
-
 
 init(1000 / 60, "Collision detection", 800, 530, main)

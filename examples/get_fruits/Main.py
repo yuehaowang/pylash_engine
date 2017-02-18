@@ -5,9 +5,6 @@ import random
 from Player import Player
 from Item import Item
 
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.utils import stage, init, addChild, KeyCode
 from pylash.system import LoadManage
 from pylash.display import Sprite, BitmapData, Bitmap, FPS

@@ -1,9 +1,6 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.utils import init, addChild
 from pylash.system import LoadManage
 from pylash.events import MouseEvent

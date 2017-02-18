@@ -188,7 +188,7 @@ class Stage(Object):
 stage = Stage()
 
 
-class KeyCode(Object):
+class KeyCode(object):
 	def __init__(self):
 		Exception("KeyCode cannot be instantiated.")
 
@@ -283,4 +283,4 @@ def removeItemsInList(theList, condition):
 	for i in targetList:
 		theList.remove(i)
 
-	return targetList		
+	return targetList

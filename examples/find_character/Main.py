@@ -3,9 +3,6 @@
 
 from GameLayer import GameLayer
 
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.utils import init, addChild, removeChild, stage
 from pylash.display import Sprite, Bitmap, BitmapData
 from pylash.text import TextField, TextFormatWeight

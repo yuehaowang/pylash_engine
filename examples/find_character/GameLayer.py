@@ -1,9 +1,7 @@
-import sys
 import random
 import math
 from TimeBar import TimeBar
 
-sys.path.insert(0, "../../")
 from pylash.utils import stage
 from pylash.display import Sprite, Bitmap, BitmapData, Shape
 from pylash.text import TextField, TextFormatWeight, TextFormatAlign

@@ -6,7 +6,7 @@ from .utils import Object, getColor, stage
 __author__ = "Yuehao Wang"
 
 
-class TextFormatAlign(Object):
+class TextFormatAlign(object):
 	RIGHT = "right"
 	LEFT = "left"
 	CENTER = "center"
@@ -17,7 +17,7 @@ class TextFormatAlign(Object):
 		raise Exception("TextFormatAlign cannot be instantiated.")
 
 
-class TextFormatBaseline(Object):
+class TextFormatBaseline(object):
 	ALPHABETIC = "alphabetic"
 	BOTTOM = "bottom"
 	MIDDLE = "middle"
@@ -28,7 +28,7 @@ class TextFormatBaseline(Object):
 		raise Exception("TextFormatBaseline cannot be instantiated.")
 
 
-class TextFormatWeight(Object):
+class TextFormatWeight(object):
 	NORMAL = "normal"
 	BOLD = "bold"
 	BOLDER = "bolder"

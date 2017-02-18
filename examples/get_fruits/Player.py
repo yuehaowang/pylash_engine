@@ -1,6 +1,3 @@
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.utils import stage
 from pylash.display import Sprite, Animation, BitmapData
 

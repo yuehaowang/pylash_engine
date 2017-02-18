@@ -1,7 +1,5 @@
-import sys
 import time
 
-sys.path.insert(0, "../../")
 from pylash.utils import stage
 from pylash.display import Sprite
 from pylash.events import Event

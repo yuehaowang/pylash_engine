@@ -7,9 +7,6 @@ from characters_data import charactersData
 from AttackCharacter import AttackCharacter
 from Enemy import Enemy
 
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.utils import stage, init, addChild
 from pylash.system import LoadManage
 from pylash.display import Sprite, BitmapData, Bitmap, FPS

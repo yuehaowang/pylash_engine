@@ -1,8 +1,5 @@
 from map_data import terrainList
 
-import sys
-
-sys.path.insert(0, "../../")
 from pylash.display import Sprite, BitmapData, Animation, AnimationSet, AnimationPlayMode
 from pylash.events import Event, AnimationEvent
 
