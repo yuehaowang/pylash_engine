@@ -9,5 +9,6 @@ if len(pathList) >= 2:
 	dirPath = "./%s/%s" % (pathList[0], pathList[1])
 
 	os.chdir(dirPath)
+	sys.path.insert(0, "./")
 
 	runpy.run_path("./Main.py", run_name = "__main__")
