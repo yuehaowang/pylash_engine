@@ -31,4 +31,4 @@ def main():
 	t3.italic = True
 	addChild(t3)
 
-init(1000 / 60, "Hello World", 800, 430, main)
+init(1000 / 60, "TextField", 800, 430, main)
