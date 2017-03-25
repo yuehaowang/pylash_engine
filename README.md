@@ -3,7 +3,7 @@
 
 **Latest Version: 1.5.0**
 
-`Pylash` is a game engine for `python`. We develop `pylash` in `python3` and the GUI engine of `pylash` is `PyQt4`. With `pylash`, you could create games in a simple way.
+`Pylash` is a game engine for `python`. We develop `pylash` in `python3` and the GUI engine of `pylash` is `PyQt4`. With `pylash` engine, you could create games in a simple way.
 
 
 ## License: MIT License
@@ -17,7 +17,7 @@ We use [MIT License](http://en.wikipedia.org/wiki/MIT_License), which is a kind 
 
 1. Cross-platform. No matter which computer OS you choose, if `python3` and `PyQt4` are both available on it, `pylash` is available as well.
 2. Powerful. `Pylash` provides plenty of useful classes which almost come from `ActionScript 3`, a script language for `flash`. As we all know, `flash` is a good tool for creating games and animations. Therefore, `Pylash` takes in some of its advantages aiming to make creating game in `pylash` as easy as `flash`.
-3. Easy-to-get-started. It's really easy to get started with `pylash` because you don't need to follow many complex steps if you want to install it. Just install `python3` and `PyQt4` in advance and all preparations are done. Without any configurations but only to download source files and copy them into your project directory, it's already available to use `pylash` in your project. (P.S. You may have trouble installing and configuring `PyQt4`. However, don't be worried, for there are many tutorials on the Internet to tell you how to get it done.)
+3. Easy-to-get. It's really easy to install and configure `pylash` because you don't need to follow many complex steps if you want to install it. Just install `python3` and `PyQt4` in advance and all preparations are done. Without any configurations but only to download source files and copy them into your project directory, it's already available to use `pylash` in your project. (P.S. You may have trouble installing and configuring `PyQt4`. However, don't be worried, for there are many tutorials on the Internet to tell you how to get it done.)
 
 With every plus there must be a minus, `pylash` remains improved and enhanced. `Pylash` is not designed for creating commercial products because it is not run by a team or a company. But `pylash` will be a good helper for those who are freshmen in developing game and who dream of creating their own games.
 
