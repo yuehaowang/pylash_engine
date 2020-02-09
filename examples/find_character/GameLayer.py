@@ -2,9 +2,8 @@ import random
 import math
 from TimeBar import TimeBar
 
-from pylash.utils import stage
-from pylash.display import Sprite, Bitmap, BitmapData, Shape
-from pylash.text import TextField, TextFormatWeight, TextFormatAlign
+from pylash.core import stage
+from pylash.display import Sprite, Bitmap, BitmapData, Shape, TextField, TextFormatWeight, TextFormatAlign
 from pylash.events import MouseEvent
 
 class GameLayer(Sprite):
@@ -33,7 +32,6 @@ class GameLayer(Sprite):
 		targetY = random.randint(0, 9)
 
 		self.blockLayer = Sprite()
-		self.blockLayer.name = "xxx"
 		self.blockLayer.x = 50
 		self.blockLayer.y = 50
 		self.blockLayer.alpha = 0.7

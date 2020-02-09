@@ -1,7 +1,6 @@
 from map_data import terrainList
 
-from pylash.display import Sprite, BitmapData, Animation, AnimationSet, AnimationPlayMode
-from pylash.events import Event, AnimationEvent
+from pylash.display import Sprite, BitmapData, Animation, AnimationSet, AnimationPlayMode, AnimationEvent
 
 class Enemy(Sprite):
 	def __init__(self, mov, xInMap, yInMap):

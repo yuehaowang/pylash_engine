@@ -5,11 +5,10 @@ import random
 from Player import Player
 from Item import Item
 
-from pylash.utils import stage, init, addChild, KeyCode
-from pylash.system import LoadManage
-from pylash.display import Sprite, BitmapData, Bitmap, FPS
-from pylash.text import TextField, TextFormatWeight
-from pylash.events import MouseEvent, Event, KeyboardEvent
+from pylash.core import stage, init, addChild, KeyCode
+from pylash.loaders import LoadManage
+from pylash.display import Sprite, BitmapData, Bitmap, FPS, TextField, TextFormatWeight
+from pylash.events import MouseEvent, LoopEvent, KeyboardEvent
 from pylash.ui import LoadingSample1
 
 dataList = {}
@@ -141,7 +140,7 @@ def startGame(e):
 	# add events
 	stageLayer.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown)
 	stageLayer.addEventListener(MouseEvent.MOUSE_UP, onMouseUp)
-	stageLayer.addEventListener(Event.ENTER_FRAME, loop)
+	stageLayer.addEventListener(LoopEvent.ENTER_FRAME, loop)
 
 def keyDown(e):
 	global player

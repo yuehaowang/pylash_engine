@@ -1,8 +1,7 @@
-from PyQt4 import QtGui
-from .utils import Object, stage, removeItemsInList, getColor
-from .display import Sprite, DisplayObject, RadialGradientColor, LinearGradientColor, Graphics
-from .text import TextField, TextFormatWeight
-from .events import MouseEvent, EventDispatcher, Event
+from PySide2 import QtGui, QtWidgets
+from .core import Object, stage, removeItemsInList, getColor
+from .display import Sprite, DisplayObject, RadialGradientColor, LinearGradientColor, Graphics, TextField, TextFormatWeight
+from .events import Event, MouseEvent, EventDispatcher, LoopEvent
 
 
 __author__ = "Yuehao Wang"
@@ -15,7 +14,7 @@ class ButtonState(object):
 	DOWN = "down_state"
 	DISABLED = "disabled_state"
 
-	def __init__():
+	def __init__(self):
 		raise Exception("ButtonState cannot be instantiated.")
 
 
@@ -507,6 +506,15 @@ class ButtonSample(Button):
 		self.addChild(txt)
 
 
+class LineEditEvent(object):
+		TYPE = Event("line_edit_input")
+		FOCUS_IN = Event("line_edit_focus_in")
+		FOCUS_OUT = Event("line_edit_focus_out")
+
+		def __init__(self):
+			raise Exception("LineEditEvent cannot be instantiated.")
+
+
 class LineEdit(Sprite):
 	def __init__(self, backgroundLayer = None):
 		super(LineEdit, self).__init__()
@@ -523,7 +531,7 @@ class LineEdit(Sprite):
 		self.__textColor = "black"
 		self.__widgetFont = QtGui.QFont()
 		self.__widgetPalette = QtGui.QPalette()
-		self.lineEditWidget = QtGui.QLineEdit(stage.canvasWidget)
+		self.lineEditWidget = QtWidgets.QLineEdit(stage.canvasWidget)
 		self.backgroundLayer = backgroundLayer
 
 		if not isinstance(self.backgroundLayer, DisplayObject):
@@ -537,7 +545,7 @@ class LineEdit(Sprite):
 
 		self.__initWidget()
 
-		self.addEventListener(Event.ENTER_FRAME, self.__loop)
+		self.addEventListener(LoopEvent.ENTER_FRAME, self.__loop)
 
 	@property
 	def text(self):
@@ -601,6 +609,14 @@ class LineEdit(Sprite):
 
 		self.__widgetFont.setItalic(v)
 		self.lineEditWidget.setFont(self.__widgetFont)
+	
+	def _onLineEditFocusIn(self, e):
+		self.dispatchEvent(LineEditEvent.FOCUS_IN)
+		return QtWidgets.QLineEdit.focusInEvent(self.lineEditWidget, e)
+	
+	def _onLineEditFocusOut(self, e):
+		self.dispatchEvent(LineEditEvent.FOCUS_OUT)
+		return QtWidgets.QLineEdit.focusOutEvent(self.lineEditWidget, e)
 
 	def __initWidget(self):
 		self.__widgetPalette.setColor(QtGui.QPalette.Base, getColor("transparent"))
@@ -619,6 +635,11 @@ class LineEdit(Sprite):
 		
 		pos = self.getRootCoordinate()
 		self.lineEditWidget.move(pos.x, pos.y)
+
+		self.lineEditWidget.textEdited.connect(lambda t: self.dispatchEvent(LineEditEvent.TYPE))
+		self.lineEditWidget.focusInEvent = self._onLineEditFocusIn
+		self.lineEditWidget.focusOutEvent = self._onLineEditFocusOut
+		self.setMargins(5, 0, 5, 0)
 
 	def __getFontWeight(self, v):
 		weight = v
@@ -660,13 +681,16 @@ class LineEdit(Sprite):
 			self.__preWidth = w
 			self.__preHeight = h
 
-	def die(self):
-		super(LineEdit, self).die()
-
-		self.lineEditWidget.deleteLater()
-
 	def setBackgroundLayer(self, backgroundLayer):
 		self.backgroundLayer.remove()
 
 		self.backgroundLayer = backgroundLayer
 		self.addChild(self.backgroundLayer)
+	
+	def setMargins(self, left = 0, top = 0, right = 0, bottom = 0):
+		self.lineEditWidget.setTextMargins(left, top, right, bottom)
+
+	def die(self):
+		super(LineEdit, self).die()
+
+		self.lineEditWidget.hide()

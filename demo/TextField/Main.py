@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pylash.utils import init, addChild
-from pylash.text import TextField, TextFormatWeight
+from pylash.core import init, addChild
+from pylash.display import TextField, TextFormatWeight
 
 def main():
 	t1 = TextField()
@@ -24,7 +24,7 @@ def main():
 	t3 = TextField()
 	t3.x = 300
 	t3.y = 130
-	t3.text = "Based on Python3, PyQt4"
+	t3.text = "Based on Python3, PySide2"
 	t3.alpha = 0.7
 	t3.size = 40
 	t3.textColor = "#0000FF"

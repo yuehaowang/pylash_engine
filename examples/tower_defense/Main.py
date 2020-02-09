@@ -7,11 +7,10 @@ from characters_data import charactersData
 from AttackCharacter import AttackCharacter
 from Enemy import Enemy
 
-from pylash.utils import stage, init, addChild
-from pylash.system import LoadManage
-from pylash.display import Sprite, BitmapData, Bitmap, FPS
-from pylash.text import TextField, TextFormatWeight
-from pylash.events import MouseEvent, Event
+from pylash.core import stage, init, addChild
+from pylash.loaders import LoadManage
+from pylash.display import Sprite, BitmapData, Bitmap, FPS, TextField, TextFormatWeight
+from pylash.events import MouseEvent, LoopEvent
 from pylash.ui import LoadingSample2, Button, ButtonState
 
 dataList = {}
@@ -35,6 +34,7 @@ startBtn = None
 start = False
 
 enemyNum = 0
+max_num_enemy = 15
 
 loopSpeed = 30
 loopIndex = 0
@@ -333,7 +333,7 @@ def addEvents():
 	gameLayer.addEventListener(MouseEvent.MOUSE_UP, onMouseUpAtGameLayer)
 	
 	stageLayer.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMoveAtStageLayer)
-	stageLayer.addEventListener(Event.ENTER_FRAME, loop)
+	stageLayer.addEventListener(LoopEvent.ENTER_FRAME, loop)
 
 	ctrlLayer.addEventListener(MouseEvent.MOUSE_UP, onMouseUpAtCtrlLayer)
 
@@ -362,7 +362,7 @@ def createOurCharacter(name, x, y):
 	AttackCharacter.ourList.append(character)
 
 def loop(e):
-	global characterLayer, loopIndex, loopSpeed, start, enemyNum
+	global characterLayer, loopIndex, loopSpeed, start, enemyNum, max_num_enemy
 
 	if not start:
 		return
@@ -376,8 +376,10 @@ def loop(e):
 	loopIndex = 0
 
 	# control the number of enemy
-	if enemyNum >= 15:
+	if enemyNum >= max_num_enemy:
 		start = False
+
+		max_num_enemy += 5
 
 		return
 

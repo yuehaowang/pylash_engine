@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pylash.utils import init, addChild
+from pylash.core import init, addChild
 from pylash.display import Sprite, Graphics
 
 def main():

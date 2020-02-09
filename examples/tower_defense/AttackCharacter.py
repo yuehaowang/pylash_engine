@@ -1,7 +1,6 @@
 from Enemy import Enemy
 
-from pylash.display import Sprite, BitmapData, Animation, AnimationSet, AnimationPlayMode
-from pylash.events import AnimationEvent
+from pylash.display import Sprite, BitmapData, Animation, AnimationSet, AnimationEvent, AnimationPlayMode
 
 class AttackCharacter(Sprite):
 	def __init__(self, name, mov, atk, xInMap, yInMap, atkValue):

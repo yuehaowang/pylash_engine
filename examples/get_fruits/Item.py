@@ -1,4 +1,4 @@
-from pylash.utils import stage
+from pylash.core import stage
 from pylash.display import Sprite, Bitmap, BitmapData
 
 class Item(Sprite):

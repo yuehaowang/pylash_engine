@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pylash.utils import init, addChild
-from pylash.system import LoadManage
+from pylash.core import init, addChild
+from pylash.loaders import LoadManage
 from pylash.display import BitmapData, Bitmap
 from pylash.ui import LoadingSample2
 from pylash.transitions import TweenLite, Easing

@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pylash.utils import init, addChild
-from pylash.system import LoadManage
+from pylash.core import init, addChild
+from pylash.loaders import LoadManage
 from pylash.events import MouseEvent
 from pylash.display import BitmapData, Bitmap, Sprite, AnimationSet, Animation, AnimationPlayMode
 from pylash.ui import LoadingSample2, ButtonSample
@@ -130,4 +130,4 @@ def demoInit(result):
 def onBtnClick(e):
 	animaSet.changeAnimation(e.currentTarget.label.replace(" ", "_"))
 
-init(1000 / 60, "Animation demo", 600, 400, main)
+init(1000 / 60, "Animation demo", 550, 300, main)

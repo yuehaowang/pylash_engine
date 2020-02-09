@@ -3,10 +3,9 @@
 
 from GameLayer import GameLayer
 
-from pylash.utils import init, addChild, removeChild, stage
-from pylash.display import Sprite, Bitmap, BitmapData
-from pylash.text import TextField, TextFormatWeight
-from pylash.system import LoadManage
+from pylash.core import init, addChild, removeChild, stage
+from pylash.display import Sprite, Bitmap, BitmapData, TextField, TextFormatWeight
+from pylash.loaders import LoadManage
 from pylash.events import MouseEvent
 from pylash.ui import LoadingSample2
 

@@ -1,8 +1,8 @@
 import time
 
-from pylash.utils import stage
+from pylash.core import stage
 from pylash.display import Sprite
-from pylash.events import Event
+from pylash.events import LoopEvent
 
 class TimeBar(Sprite):
 	def __init__(self):
@@ -21,7 +21,7 @@ class TimeBar(Sprite):
 		self.graphics.endFill()
 
 		# add loop event that will be dispatch when the page is redrawn
-		self.addEventListener(Event.ENTER_FRAME, self.loop)
+		self.addEventListener(LoopEvent.ENTER_FRAME, self.loop)
 
 	def loop(self, e):
 		currentTime = time.time()

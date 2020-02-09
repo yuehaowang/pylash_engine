@@ -1,6 +1,6 @@
 import math
-from PyQt4 import QtGui
-from .utils import Object
+from PySide2 import QtGui
+from .core import Object
 
 
 __author__ = "Yuehao Wang"
@@ -363,13 +363,13 @@ class SAT(object):
 			p = None
 
 			if isinstance(A, Circle):
-				c = A;
-				p = B;
+				c = A
+				p = B
 			else:
-				c = B;
-				p = A;
+				c = B
+				p = A
 
-			res = SAT.hitTestCircleAndPolygon(c, p);
+			res = SAT.hitTestCircleAndPolygon(c, p)
 
 		return res
 

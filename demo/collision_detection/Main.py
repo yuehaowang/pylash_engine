@@ -3,7 +3,7 @@
 
 import math
 
-from pylash.utils import init, addChild, stage
+from pylash.core import init, addChild, stage
 from pylash.display import Sprite
 from pylash.events import MouseEvent
 from pylash.geom import Vec2, Polygon, Circle

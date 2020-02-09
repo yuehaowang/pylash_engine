@@ -1,7 +1,7 @@
 import time, math
-from PyQt4 import QtGui, QtCore
-from .utils import Object, stage, getColor, Stage
-from .events import EventDispatcher, Event, MouseEvent, AnimationEvent
+from PySide2 import QtGui, QtCore
+from .core import Object, stage, getColor, Stage
+from .events import Event, EventDispatcher, LoopEvent, MouseEvent
 from .geom import Point, Transform, Rectangle, Polygon, Circle, Matrix, SAT
 
 
@@ -12,7 +12,6 @@ class DisplayObject(EventDispatcher):
 	def __init__(self):
 		super(DisplayObject, self).__init__()
 
-		self.name = "instance" + str(self.objectIndex)
 		self.parent = None
 		self.x = 0
 		self.y = 0
@@ -28,6 +27,9 @@ class DisplayObject(EventDispatcher):
 		self._mouseIsOn = False
 		self.__setWidth = None
 		self.__setHeight = None
+
+	def _nonCopyableAttrs(self):
+		return super(DisplayObject, self)._nonCopyableAttrs() + ["parent"]
 
 	@property
 	def width(self):
@@ -81,7 +83,7 @@ class DisplayObject(EventDispatcher):
 		if not self.visible:
 			return
 		
-		self._loopFrame()
+		self._loopFrame(LoopEvent.ENTER_FRAME)
 
 		widthScale = 1
 		heightScale = 1
@@ -105,12 +107,14 @@ class DisplayObject(EventDispatcher):
 		c.setCompositionMode(self.__getCompositionMode())
 
 		if self._hasMask():
-			c.setClipPath(self.mask._clipPath, QtCore.Qt.UniteClip)
+			c.setClipPath(self.mask._clipPath, QtCore.Qt.ReplaceClip)
 			c.clipPath()
 
 		self._loopDraw(c)
 
 		c.restore()
+
+		self._loopFrame(LoopEvent.EXIT_FRAME)
 
 	def _hasMask(self):
 		return isinstance(self.mask, DisplayObject) and hasattr(self.mask, "_clipPath") and isinstance(self.mask._clipPath, QtGui.QPainterPath)
@@ -138,7 +142,7 @@ class DisplayObject(EventDispatcher):
 
 		return False
 
-	def _loopFrame(self):
+	def _loopFrame(self, e):
 		pass
 
 	def _loopDraw(self, c):
@@ -273,30 +277,8 @@ class BlendMode(object):
 	NONE = None
 	NORMAL = None
 
-	def __init__():
-		raise Exception("BlendMode cannot be instantiated.")
-
-
-class Loader(DisplayObject):
-	ignoreLoadingError = False
-
 	def __init__(self):
-		super(Loader, self).__init__()
-
-		self.content = None
-		
-	def load(self, url):
-		image = QtGui.QImage()
-		image.load(url)
-
-		self.content = image
-
-		if image.isNull() and not Loader.ignoreLoadingError:
-			raise Exception("Loader cannot load data in the path you give.")
-
-		e = Event(Event.COMPLETE)
-		e.target = image
-		self.dispatchEvent(e)
+		raise Exception("BlendMode cannot be instantiated.")
 
 
 class BitmapData(Object):
@@ -571,7 +553,8 @@ class InteractiveObject(DisplayObject):
 		self.mouseEnabled = True
 
 	def __isMouseEvent(self, e):
-		return isinstance(e, Event) and (e.eventType.find("mouse") >= 0 or e.eventType.find("touch") >= 0)
+		e = Event(e)
+		return e.eventType.find("mouse_") == 0
 
 	def addEventListener(self, e, listener):
 		if self.__isMouseEvent(e):
@@ -614,8 +597,8 @@ class DisplayObjectContainer(InteractiveObject):
 	@property
 	def numChildren(self):
 		return len(self.childList)
-
-	def addChild(self, child, index = None):
+	
+	def addChild(self, child):
 		childList = self.childList
 
 		if isinstance(child, DisplayObject):
@@ -624,15 +607,23 @@ class DisplayObjectContainer(InteractiveObject):
 
 			child.parent = self
 
-			if index is None:
-				childList.append(child)
-			elif isinstance(index, int) and index < len(childList):
-				childList.insert(index, child)
+			childList.append(child)
 		else:
 			raise TypeError("DisplayObjectContainer.addChild(child): parameter 'child' must be a display object.")
 
 	def addChildAt(self, child, index):
-		self.addChild(child, index)
+		childList = self.childList
+
+		if isinstance(child, DisplayObject):
+			if child.parent is not None:
+				child.parent.removeChild(child)
+
+			child.parent = self
+
+			childList.insert(index, child)
+		else:
+			raise TypeError("DisplayObjectContainer.addChildAt(child, index): parameter 'child' must be a display object.")
+
 
 	def removeAllChildren(self):
 		for c in self.childList:
@@ -691,14 +682,15 @@ class Sprite(DisplayObjectContainer):
 		self.useHandCursor = False
 		self.shapes = None
 		self._clipPath = self.graphics._clipPath
+		self._loopEventList = []
 
 	def _loopDraw(self, c):
 		self.graphics._show(c)
 
 		stage._showDisplayList(self.childList)
 
-	def _loopFrame(self):
-		self.dispatchEvent(Event.ENTER_FRAME)
+	def _loopFrame(self, e):
+		self.dispatchEvent(e)
 
 	def startX(self):
 		left = self.graphics.startX()
@@ -852,20 +844,14 @@ class Sprite(DisplayObjectContainer):
 		if not self.mouseEnabled:
 			return
 
-		for o in self._mouseEventList:
-			t = o["eventType"]
-			l = o["listener"]
-
-			if t.eventType == e["eventType"]:
-				eve = Event(e["eventType"])
-				eve.offsetX = e["offsetX"]
-				eve.offsetY = e["offsetY"]
-				eve.selfX = (e["offsetX"] - cd["x"]) / cd["scaleX"]
-				eve.selfY = (e["offsetY"] - cd["y"]) / cd["scaleY"]
-				eve.target = e["target"]
-				eve.currentTarget = self
-
-				l(eve)
+		eve = Event(e["eventType"])
+		eve.offsetX = e["offsetX"]
+		eve.offsetY = e["offsetY"]
+		eve.selfX = (e["offsetX"] - cd["x"]) / cd["scaleX"]
+		eve.selfY = (e["offsetY"] - cd["y"]) / cd["scaleY"]
+		eve.target = e["target"]
+		eve.currentTarget = self
+		self.dispatchEvent(eve)
 
 	def _getOriginalWidth(self):
 		return self.endX() - self.startX()
@@ -911,6 +897,39 @@ class Sprite(DisplayObjectContainer):
 					return True
 
 		return False
+	
+	def __isLoopEvent(self, e):
+		e = Event(e)
+		return e.eventType.find("loop_") == 0
+
+	def addEventListener(self, e, listener):
+		if self.__isLoopEvent(e):
+			self._addEventListenerInList(e, listener, self._loopEventList)
+		else:
+			super(Sprite, self).addEventListener(e, listener)
+
+	def removeEventListener(self, e, listener):
+		if self.__isLoopEvent(e):
+			self._removeEventListenerInList(e, listener, self._loopEventList)
+		else:
+			super(Sprite, self).removeEventListener(e, listener)
+
+	def removeAllEventListeners(self):
+		self._loopEventList = []
+
+		super(Sprite, self).removeAllEventListeners()
+
+	def dispatchEvent(self, e):
+		if self.__isLoopEvent(e):
+			self._dispatchEventInList(e, self._loopEventList)
+		else:
+			super(Sprite, self).dispatchEvent(e)
+
+	def hasEventListener(self, e, listener):
+		if self.__isLoopEvent(e):
+			return self._hasEventListenerInList(e, listener, self._loopEventList)
+		else:
+			return super(Sprite, self).hasEventListener(e, listener)
 
 
 class Shape(DisplayObject):
@@ -973,7 +992,7 @@ class JoinStyle(object):
 	ROUND = "round"
 	BEVEL = "bevel"
 
-	def __init__():
+	def __init__(self):
 		raise Exception("JoinStyle cannot be instantiated.")
 
 
@@ -982,7 +1001,7 @@ class CapsStyle(object):
 	SQUARE = "square"
 	ROUND = "round"
 
-	def __init__():
+	def __init__(self):
 		raise Exception("CapsStyle cannot be instantiated.")
 
 
@@ -1249,6 +1268,130 @@ class Graphics(DisplayObject):
 		return False
 
 
+class TextFormatAlign(object):
+	RIGHT = "right"
+	LEFT = "left"
+	CENTER = "center"
+	START = "start"
+	END = "end"
+
+	def __init__(self):
+		raise Exception("TextFormatAlign cannot be instantiated.")
+
+
+class TextFormatBaseline(object):
+	ALPHABETIC = "alphabetic"
+	BOTTOM = "bottom"
+	MIDDLE = "middle"
+	HANGING = "hanging"
+	TOP = "top"
+
+	def __init__(self):
+		raise Exception("TextFormatBaseline cannot be instantiated.")
+
+
+class TextFormatWeight(object):
+	NORMAL = "normal"
+	BOLD = "bold"
+	BOLDER = "bolder"
+	LIGHTER = "lighter"
+
+	def __init__(self):
+		raise Exception("TextFormatWeight cannot be instantiated.")
+
+
+class TextField(DisplayObject):
+	def __init__(self):
+		super(TextField, self).__init__()
+
+		self.text = ""
+		self.font = "Arial"
+		self.size = 15
+		self.textColor = "#000000"
+		self.backgroundColor = None
+		self.italic = False
+		self.weight = TextFormatWeight.NORMAL
+		self.textAlign = TextFormatAlign.LEFT
+		self.textBaseline = TextFormatBaseline.TOP
+		
+	def _getOriginalWidth(self):
+		font = self.__getFont()
+		fontMetrics = QtGui.QFontMetrics(font)
+
+		return fontMetrics.width(str(self.text))
+
+	def _getOriginalHeight(self):
+		font = self.__getFont()
+		fontMetrics = QtGui.QFontMetrics(font)
+
+		return fontMetrics.height()
+
+	def __getFont(self):
+		weight = self.weight
+
+		if self.weight == TextFormatWeight.NORMAL:
+			weight = QtGui.QFont.Normal
+		elif self.weight == TextFormatWeight.BOLD:
+			weight = QtGui.QFont.Bold
+		elif self.weight == TextFormatWeight.BOLDER:
+			weight = QtGui.QFont.Black
+		elif self.weight == TextFormatWeight.LIGHTER:
+			weight = QtGui.QFont.Light
+
+		font = QtGui.QFont()
+		font.setFamily(self.font)
+		font.setPixelSize(self.size)
+		font.setWeight(weight)
+		font.setItalic(self.italic)
+
+		return font
+
+	def __getTextStartX(self):
+		w = self._getOriginalWidth()
+
+		if self.textAlign == TextFormatAlign.END or self.textAlign == TextFormatAlign.RIGHT:
+			return -w
+		elif self.textAlign == TextFormatAlign.CENTER:
+			return -w / 2
+		else:
+			return 0
+
+	def __getTextStartY(self):
+		h = self._getOriginalHeight()
+
+		if self.textBaseline == TextFormatBaseline.ALPHABETIC or self.textBaseline == TextFormatBaseline.MIDDLE:
+			return -h
+		elif self.textBaseline == TextFormatBaseline.MIDDLE:
+			return -h / 2
+		else:
+			return 0
+
+	def _loopDraw(self, c):
+		font = self.__getFont()
+		flags = QtCore.Qt.AlignCenter
+		startX = self.__getTextStartX()
+		startY = self.__getTextStartY()
+		width = self._getOriginalWidth()
+		height = self._getOriginalHeight()
+
+		pen = QtGui.QPen()
+		pen.setBrush(QtGui.QBrush(getColor(self.textColor)))
+
+		if self.backgroundColor:
+			brush = QtGui.QBrush()
+			brush.setColor(getColor(self.backgroundColor))
+			brush.setStyle(QtCore.Qt.SolidPattern)
+			c.setBrush(brush)
+
+			c.setPen(getColor("transparent"))
+
+			c.drawRect(startX, startY, width, height)
+
+		c.setFont(font)
+		c.setPen(pen)
+		c.drawText(startX, startY, width, height, flags, str(self.text))
+
+
 class FPS(Sprite):
 	def __init__(self):
 		super(FPS, self).__init__()
@@ -1260,14 +1403,12 @@ class FPS(Sprite):
 		self.__background.alpha = 0.8
 		self.addChild(self.__background)
 
-		from .text import TextField
-
 		self.__txt = TextField()
 		self.__txt.size = 20
 		self.__txt.textColor = "white"
 		self.addChild(self.__txt)
 
-		self.addEventListener(Event.ENTER_FRAME, self.__onFrame)
+		self.addEventListener(LoopEvent.ENTER_FRAME, self.__onFrame)
 
 	def __onFrame(self, e):
 		currentTime = time.time()
@@ -1303,14 +1444,20 @@ class AnimationFrame(Object):
 		self.alpha = 1
 		self.delay = 0
 
-
 class AnimationPlayMode(object):
-	HORIZONTAL = "horizontal"
-	VERTICAL = "vertical"
+	HORIZONTAL = "animation_play_horizontal"
+	VERTICAL = "animation_play_vertical"
 
-	def __init__():
+	def __init__(self):
 		raise Exception("AnimationPlayMode cannot be instantiated.")
 
+class AnimationEvent(object):
+	CHANGE_FRAME = Event("animation_change_frame")
+	STOP = Event("animation_stop")
+	START = Event("animation_start")
+
+	def __init__(self):
+		raise Exception("AnimationEvent cannot be instantiated.")
 
 class Animation(Sprite):
 	def __init__(self, bitmapData = BitmapData(), frameList = [[AnimationFrame()]]):
@@ -1337,7 +1484,7 @@ class Animation(Sprite):
 		
 		self.addChild(self.bitmap)
 		self.bitmapData.setProperties(self.currentFrame.x, self.currentFrame.y, self.currentFrame.width, self.currentFrame.height)
-		self.addEventListener(Event.ENTER_FRAME, self.__onFrame)
+		self.addEventListener(LoopEvent.ENTER_FRAME, self.__onFrame)
 
 	@property
 	def playing(self):
@@ -1458,6 +1605,7 @@ class Animation(Sprite):
 
 		return -1
 
+	@staticmethod
 	def divideUniformSizeFrames(width = 0, height = 0, col = 1, row = 1):
 		result = []
 		frameWidth = width / col
@@ -1541,7 +1689,7 @@ class SpreadMethod(object):
 	REPEAT = "repeat"
 	REFLECT = "reflect"
 
-	def __init__():
+	def __init__(self):
 		raise Exception("SpreadMethod cannot be instantiated.")
 
 

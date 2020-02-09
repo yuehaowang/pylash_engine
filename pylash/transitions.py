@@ -1,12 +1,12 @@
 import math, time
-from .utils import Object, stage, UnityOfDictAndClass
+from .core import Object, stage, UnityOfDictAndClass
 
 
 __author__ = "Yuehao Wang"
 
 
 class Uniform(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Uniform cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -20,7 +20,7 @@ class Uniform(object):
 
 
 class Quad(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Quad cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -45,7 +45,7 @@ class Quad(object):
 		
 
 class Cubic(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Cubic cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -70,7 +70,7 @@ class Cubic(object):
 
 
 class Quart(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Quart cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -95,7 +95,7 @@ class Quart(object):
 
 
 class Quint(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Quint cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -120,7 +120,7 @@ class Quint(object):
 
 
 class Sine(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Sine cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -134,7 +134,7 @@ class Sine(object):
 
 
 class Strong(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Strong cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -159,7 +159,7 @@ class Strong(object):
 
 
 class Expo(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Expo cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -186,7 +186,7 @@ class Expo(object):
 
 
 class Circ(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Circ cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -211,7 +211,7 @@ class Circ(object):
 
 
 class Elastic(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Elastic cannot be instantiated.")
 
 	def easeIn(t, b, c, d, a = None, p = None):
@@ -291,7 +291,7 @@ class Elastic(object):
 
 
 class Back(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Back cannot be instantiated.")
 
 	def easeIn(t, b, c, d, s = None):
@@ -328,7 +328,7 @@ class Back(object):
 
 
 class Bounce(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Bounce cannot be instantiated.")
 
 	def easeIn(t, b, c, d):
@@ -360,7 +360,7 @@ class Bounce(object):
 		
 
 class Easing(object):
-	def __init__():
+	def __init__(self):
 		raise Exception("Easing cannot be instantiated.")
 
 setattr(Easing, "Uniform", Uniform)
@@ -378,19 +378,19 @@ setattr(Easing, "Bounce", Bounce)
 
 
 class TweenLiteChild(Object):
-	def __init__(self, target, duration, vars):
+	def __init__(self, target, duration, tranVars):
 		super(TweenLiteChild, self).__init__()
 
 		self.__toNew = []
-		self._initTween(target, duration, vars)
+		self._initTween(target, duration, tranVars)
 
-	def _initTween(self, target, duration, vars):
+	def _initTween(self, target, duration, tranVars):
 		if not duration:
 			duration = 0.001
 		
 		self.__target = target
 		self.__duration = duration
-		self.__vars = vars
+		self.__vars = tranVars
 
 		if not "delay" in self.__vars:
 			self.__vars["delay"] = 0
@@ -440,14 +440,14 @@ class TweenLiteChild(Object):
 	def resume(self):
 		self.stop = False
 
-	def to(self, target, duration, vars):
+	def to(self, target, duration, tranVars):
 		if target == None:
-			raise TypeError("TweenLiteChild.to(target, duration, vars): parameter 'target' cannot be None.")
+			raise TypeError("TweenLiteChild.to(target, duration, tranVars): parameter 'target' cannot be None.")
 
-		if not isinstance(vars, dict):
-			raise TypeError("TweenLiteChild.to(target, duration, vars): parameter 'vars' must be a dict object.")
+		if not isinstance(tranVars, dict):
+			raise TypeError("TweenLiteChild.to(target, duration, tranVars): parameter 'tranVars' must be a dict object.")
 
-		self.__toNew.append({"target" : target, "duration" : duration, "vars" : vars})
+		self.__toNew.append({"target" : target, "duration" : duration, "vars" : tranVars})
 		
 		return self
 
@@ -505,14 +505,14 @@ class TweenLiteChild(Object):
 
 			target = UnityOfDictAndClass.get(t, "target")
 			duration = UnityOfDictAndClass.get(t, "duration")
-			vars = UnityOfDictAndClass.get(t, "vars")
+			tranVars = UnityOfDictAndClass.get(t, "vars")
 
 			if hasattr(self, "loop") and self.loop:
-				vs = dict(vars)
+				vs = dict(tranVars)
 				
 				self.to(target, duration, vs)
 			
-			self._initTween(target, duration, vars)
+			self._initTween(target, duration, tranVars)
 
 			return True
 		
@@ -527,17 +527,17 @@ class TweenLite(Object):
 	def count():
 		return len(TweenLite.__tweens)
 
-	def to(target, duration, vars):
+	def to(target, duration, tranVars):
 		if target == None:
-			raise TypeError("TweenLite.to(target, duration, vars): parameter 'target' cannot be None.")
+			raise TypeError("TweenLite.to(target, duration, tranVars): parameter 'target' cannot be None.")
 		
-		if not isinstance(vars, dict):
-			raise TypeError("TweenLite.to(target, duration, vars): parameter 'vars' must be a dict object.")
+		if not isinstance(tranVars, dict):
+			raise TypeError("TweenLite.to(target, duration, tranVars): parameter 'tranVars' must be a dict object.")
 
 		tween = TweenLiteChild({}, 0, {})
 		TweenLite.__tweens.append(tween)
 
-		tween.to(target, duration, vars)
+		tween.to(target, duration, tranVars)
 
 		return tween
 
