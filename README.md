@@ -51,22 +51,24 @@ For `pylash` is based on `Python3` and `PyQt4`, you need to install them in adva
 
 ## Contributing
 
-This project is hosted on Github. Issue reports and pull requests are welcome.
+This project is hosted [on Github](https://github.com/yuehaowang/pylash_engine). Issue reports and pull requests are welcome. In addition, you can drop me an email if you have any question or suggestion.
+
+> My email: wangyuehao1999@gmail.com
 
 
 ## Examples
 
 - **Find Character**
 
-![Find Character](./doc/images/find_character.png)
+![Find Character](https://github.com/yuehaowang/pylash_engine/raw/master/doc/images/find_character.png)
 
 - **Get Fruits**
 
-![Get Fruits](./doc/images/get_fruits.png)
+![Get Fruits](https://github.com/yuehaowang/pylash_engine/raw/master/doc/images/get_fruits.png)
 
 - **Tower Defense**
 
-![Tower Defense](./doc/images/tower_defense.png)
+![Tower Defense](https://github.com/yuehaowang/pylash_engine/raw/master/doc/images/tower_defense.png)
 
 
 <!-- ## Get Started
