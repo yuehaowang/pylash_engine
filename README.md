@@ -56,7 +56,7 @@ This project is hosted [on Github](https://github.com/yuehaowang/pylash_engine).
 > My email: wangyuehao1999@gmail.com
 
 
-## Examples
+## Example Screenshots
 
 - **Find Character**
 
