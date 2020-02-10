@@ -3,7 +3,7 @@
 
 **Latest Version: 2.0.0**
 
-*Pylash* is a modern and cross-platform 2D game engine written in `Python`. With modern and practical interfaces provided by *pylash*, you can create games in an easy and relaxed way.
+*Pylash* is a modern and cross-platform 2D game engine written in *Python*. With modern and practical interfaces provided by *pylash*, you can create games in an easy and relaxed way.
 
 
 ## License
@@ -13,47 +13,46 @@
 
 ## Why Pylash
 
-1. Cross-platform. Leveraging compatibility of *PySide2*, *pylash* supports most of mainstream platforms including Ubuntu, macOS and Windows.
+1. Cross-platform. Leveraging compatibility of the underlying engine *PySide2*, *pylash* supports many mainstream platforms including Ubuntu, macOS and Windows.
 2. Easy-to-use APIs. *Pylash* adopts ActionScript-like interface designs to raise the efficiency of game developing.
 3. Lightweight. *Pylash* does not come with piles of third-party tools and frameworks.
 4. Comprehensiveness. *Pylash* is a universal framework and provides various object-oriented interfaces including display of images, text and vector graphics, collision detection, tween animation, multimedia, etc.
 
 
-<!-- ## Get Pylash
+## Get Started with *Pylash*
 
-**With Git:**
+### Installation
 
-Input this command in `Git Bash` to clone `pylash`:
-
-```
-git clone git@github.com:yuehaowang/pylash_engine.git
+```bash
+$ pip install pylash-engine
 ```
 
-**Without Git:**
+### Hello World Program
 
-The url to download the engine is here: 
+Create a *Python* file and open it with your favorite text editor. Type in the code below:
 
-[https://github.com/yuehaowang/pylash_engine/archive/master.zip](https://github.com/yuehaowang/pylash_engine/archive/master.zip)
+```python
+from pylash.core import init, addChild
+from pylash.display import TextField
 
+def main():
+    txt = TextField()
+    txt.text = "Hello World"
+    txt.size = 40
+    txt.x = txt.y = 100
+    addChild(txt)
 
-## Before Using Pylash
+init(30, "Hello World", 400, 300, main)
+```
 
-For `pylash` is based on `Python3` and `PyQt4`, you need to install them in advance.
-
-**Python3 will be found here:**
-
-[https://www.python.org/](https://www.python.org/)
-
-**PyQt4 will be found here:**
-
-[https://riverbankcomputing.com/software/pyqt/intro](https://riverbankcomputing.com/software/pyqt/intro) -->
+Run the *Python* file and you will get a window with a "Hello World" text.
 
 
 ## Contributing
 
 This project is hosted [on Github](https://github.com/yuehaowang/pylash_engine). Issue reports and pull requests are welcome. In addition, you can drop me an email if you have any question or suggestion.
 
-> My email: wangyuehao1999@gmail.com
+- My email: wangyuehao1999@gmail.com
 
 
 ## Example Screenshots
