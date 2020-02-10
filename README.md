@@ -45,7 +45,7 @@ def main():
 init(30, "Hello World", 400, 300, main)
 ```
 
-Run the *Python* file and you will get a window with a "Hello World" text.
+Run the *Python* file. If a window with a "Hello World" text shows up, you have installed *pylash* successfully.
 
 
 ## Contributing
@@ -95,7 +95,7 @@ Documentation comes soon... -->
 8. Added `Video` class in `media` module for displaying videos.
 9. Improved event system. Listener will not receive an event dispatcher as the parameter anymore.
 10. Added more demo.
-11. Added docstring for `core` module.
+11. Added docstrings for `core` module.
 
 <!-- ## Changelog for 1.5.0 -->
 
