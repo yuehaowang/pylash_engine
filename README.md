@@ -11,7 +11,7 @@
 [MIT License](http://en.wikipedia.org/wiki/MIT_License)
 
 
-## Why Pylash
+## Why *Pylash*
 
 1. Cross-platform. Leveraging compatibility of the underlying engine *PySide2*, *pylash* supports many mainstream platforms including Ubuntu, macOS and Windows.
 2. Easy-to-use APIs. *Pylash* adopts ActionScript-like interface designs to raise the efficiency of game developing.
@@ -48,6 +48,15 @@ init(30, "Hello World", 400, 300, main)
 Run the *Python* file. If a window with a "Hello World" text shows up, you have installed *pylash* successfully.
 
 
+## Tutorials
+
+- [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
+- [Let's Hello World](https://github.com/yuehaowang/pylash_engine/wiki/Let's-Hello-World)
+- [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
+- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
+- [Create Vector Graphics](https://github.com/yuehaowang/pylash_engine/wiki/Create-Vector-Graphics)
+
+
 ## Contributing
 
 This project is hosted [on Github](https://github.com/yuehaowang/pylash_engine). Issue reports and pull requests are welcome. In addition, you can drop me an email if you have any question or suggestion.
@@ -70,19 +79,6 @@ This project is hosted [on Github](https://github.com/yuehaowang/pylash_engine).
 ![Tower Defense](https://github.com/yuehaowang/pylash_engine/raw/master/doc/images/tower_defense.png)
 
 
-<!-- ## Get Started
-
-- [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
-- [A Simple Program: Hello World](https://github.com/yuehaowang/pylash_engine/wiki/A-Simple-Program:-Hello-World)
-- [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
-- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
-- [Create Vector Graphics](https://github.com/yuehaowang/pylash_engine/wiki/Create-Vector-Graphics)
-
-
-## Documentation
-
-Documentation comes soon... -->
-
 ## Changelog for 2.0.0
 
 1. Port base engine from *PyQt4* to *PySide2*.
@@ -96,10 +92,3 @@ Documentation comes soon... -->
 9. Improved event system. Listener will not receive an event dispatcher as the parameter anymore.
 10. Added more demo.
 11. Added docstrings for `core` module.
-
-<!-- ## Changelog for 1.5.0 -->
-
-<!-- 1. Added `Sprite.hitTestObject` method to test collision with other objects.
-2. Added `Sprite.addShape` method to add a shape to `Sprite` objects for testing collision.
-3. Added 'run.py', which is tool to run demo and examples. Try command `python run.py examples.example_name` to run an example while try command `python run.py demo.demo_name` to run a demo.
-4. Added more demo. Check them in 'demo/' directory. -->
