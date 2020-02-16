@@ -53,7 +53,7 @@ Run the *Python* file. If a window with a "Hello World" text shows up, you have 
 - [Overview of Pylash](https://github.com/yuehaowang/pylash_engine/wiki/Overview-of-Pylash)
 - [Let's Hello World](https://github.com/yuehaowang/pylash_engine/wiki/Let's-Hello-World)
 - [Load and Display An Image](https://github.com/yuehaowang/pylash_engine/wiki/Load-and-Display-An-Image)
-- [Sprite and Mouse Event](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Event)
+- [Sprite and Mouse Events](https://github.com/yuehaowang/pylash_engine/wiki/Sprite-and-Mouse-Events)
 - [Create Vector Graphics](https://github.com/yuehaowang/pylash_engine/wiki/Create-Vector-Graphics)
 
 
